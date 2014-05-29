@@ -92,6 +92,7 @@ function Clock(root) {
     this.all = Array.prototype.slice.call(root.querySelectorAll('span'));
 
     this.settings = JSON.parse(JSON.stringify(Clock.defaults));
+    this.settings.time.now = new Date();
     this.updateClock(this.settings.time.now);
     //this.start();
 }
@@ -106,7 +107,7 @@ Clock.defaults = {
         color: {
             background: "000000",	// String, 3 or 6 digit hex RGB color with optional '#'
             active: "FFFFFF",		// String, 3 or 6 digit hex RGB color with optional '#'
-            inactive: "444444"		// String, 3 or 6 digit hex RGB color with optional '#'
+            inactive: "333333"		// String, 3 or 6 digit hex RGB color with optional '#'
         },
         animate: false,			    // Boolean, enable/disable animation when changing time
         summary: false			    // Boolean, show/hide summary of current time
