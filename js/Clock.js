@@ -45,7 +45,7 @@ function Clock(root) {
     this.OTWO = root.querySelector('#textOTWO');
     this.TWO = root.querySelector('#textTWO');
     this.TEN = root.querySelector('#textTEN');
-    this.OTHREE = root.querySelector('#textO');
+    this.OTHREE = root.querySelector('#textOTHREE');
     this.THREE = root.querySelector('#textTHREE');
     this.IN = root.querySelector('#textIN');
     this.AT = root.querySelector('#textAT');
@@ -94,13 +94,14 @@ function Clock(root) {
     this.settings = JSON.parse(JSON.stringify(Clock.defaults));
     this.settings.time.now = new Date();
     this.updateClock(this.settings.time.now);
-    //this.start();
+    this.ticks = 0;
+    this.start();
 }
 
 Clock.defaults = {
     time: {
         now: new Date(),		    // Date, set the current time
-        duration: 60000,		    // Number, [1,9007199254740992], set the duration of a minute
+        duration: 200,		        // Number, [1,9007199254740992], set the duration of a minute
         run: true				    // Boolean, start/stop the clock
     },
     display: {
@@ -228,11 +229,21 @@ Clock.prototype.stop = function () {
 Clock.prototype.start = function () {
     if (this.settings.time.run) {
         if (this.interval == null) {
-            console.error("can't start, interval is not null");
+            console.log("starting");
+            this.interval = setInterval(this.tick.bind(this), this.settings.time.duration);
         } else {
-            setInterval(this.tick.bind(this), this.settings.time.duration);
+            console.error("can't start, interval is not null");
         }
     }
+};
+
+Clock.prototype.on = function (el) {
+    el.classList.add('active');
+};
+
+Clock.prototype.tick = function () {
+    this.ticks++;
+    this.updateClock(new Date(this.settings.time.now.getTime() + (60000 * this.ticks)));
 };
 
 Clock.prototype.updateClock = function (date) {
@@ -532,12 +543,4 @@ Clock.prototype.setTime = function (hour, minute, am) {
                 break;
         }
     }
-};
-
-Clock.prototype.on = function (el) {
-    el.classList.add('active');
-};
-
-Clock.prototype.tick = function () {
-    // TODO
 };
