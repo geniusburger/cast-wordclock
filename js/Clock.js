@@ -90,6 +90,10 @@ function Clock(root) {
     this.D7 = root.querySelector('#text7');
 
     this.all = Array.prototype.slice.call(root.querySelectorAll('span'));
+
+    this.settings = JSON.parse(JSON.stringify(Clock.defaults));
+    this.updateClock(this.settings.time.now);
+    //this.start();
 }
 
 Clock.defaults = {
@@ -231,6 +235,7 @@ Clock.prototype.start = function () {
 };
 
 Clock.prototype.updateClock = function (date) {
+    console.log("updateClock", date);
     var minute = date.getMinutes();
     var hour = date.getHours();
     var am = true;
@@ -534,10 +539,4 @@ Clock.prototype.on = function (el) {
 
 Clock.prototype.tick = function () {
     // TODO
-};
-
-Clock.prototype.initialize = function () {
-    this.settings = JSON.parse(JSON.stringify(Clock.defaults));
-    this.updateClock(this.settings.time.now);
-    //this.start();
 };
