@@ -1,0 +1,41 @@
+
+body {
+    background-color: #000000;
+    color: #444444;
+}
+
+.active {
+    color: #FFFFFF;
+}
+
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+#wrapper {
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    padding-top: 50px;
+}
+
+#clock {
+    font-family: monospace;
+    font-size: 200%;
+}
+
+#message {
+    height: 720PX;
+    width: 1280PX;
+    text-align: center;
+    border: 0px solid silver;
+    display: none;
+    vertical-align: middle;
+    color: #FFFFFF;
+    background-color: #000000;
+    font-weight: bold;
+    font-family: Verdana, Geneva, sans-serif;
+    font-size: 40px;
+}

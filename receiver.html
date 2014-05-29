@@ -1,0 +1,130 @@
+<!--
+Copyright (C) 2014 Google Inc. All Rights Reserved.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Word Clock</title>
+    <link rel="stylesheet" href="css/receiver.css">
+</head>
+<body>
+<div id="wrapper">
+    <div id="clock">
+        <span id="textITS">ITS</span><span id="text_1">_</span><span id="textTHREEHOUR">THREE</span><span
+            id="text_2">_</span><span id="textSIXHOUR">SIX</span><span id="textELEVENHOUR">ELEVEN</span><span
+            id="textSEVENHOUR">SEVEN</span><br>
+        <span id="textTENHOUR">TEN</span><span id="textFIVEHOUR">FIVE</span><span
+            id="textFOURHOUR">FOUR</span><span id="textNINEHOUR">NINE</span><span
+            id="textTWOHOUR">TWO</span><span id="textTWELVEHOUR">TWELVE</span><br>
+        <span id="textEIGHTHOUR">EIGHT</span><span id="textONEHOUR">ONE</span><span
+            id="textOCLOCK">OCLOCK</span><span id="textFIFTY">FIFTY</span><span id="textFORTY">FORTY</span><br>
+        <span id="textTHIRTY">THIRTY</span><span id="textTWENTY">TWENTY</span><span
+            id="textELEVEN">ELEVEN</span><span id="text_3">_</span><span id="textOFIVE">O</span><span
+            id="textFIVE">FIVE</span><br>
+        <span id="textOSEVEN">O</span><span id="textSEVEN">SEVEN</span><span id="textSEVENTEEN">TEEN</span><span
+            id="textTWELVE">TWELVE</span><span id="textOSIX">O</span><span id="textSIX">SIX</span><span
+            id="textSIXTEEN">TEEN</span><br>
+        <span id="textOFOUR">O</span><span id="textFOUR">FOUR</span><span id="textFOURTEEN">TEEN</span><span
+            id="text_4">_</span><span id="textOONE">O</span><span id="textONE">ONE</span><span
+            id="textOTHREE">O</span><span id="textTHREE">THREE</span><span id="text_5">_</span><span
+            id="textTEN">TEN</span><br>
+        <span id="textTHIRTEEN">THIRTEEN</span><span id="textFIFTEEN">FIFTEEN</span><span
+            id="textONINE">O</span><span id="textNINE">NINE</span><span id="textTEEN">TEEN</span><br>
+        <span id="textOEIGHT">O</span><span id="textEIGHT">EIGHT</span><span id="textEEN">EEN</span><span
+            id="text_6">_</span><span id="textOTWO">O</span><span id="textTWO">TWO</span><span
+            id="text_7">_</span><span id="textIN">IN</span><span id="text_8">_</span><span id="textAT">AT</span><span
+            id="text_9">_</span><span id="textTHE">THE</span><br>
+        <span id="textMID">MID</span><span id="textNIGHT">NIGHT</span><span id="textAFTER">AFTER</span><span
+            id="textNOON">NOON</span><span id="textMORNING">MORNING</span><br>
+        <span id="textTHU">THU</span><span id="textSA">SA</span><span id="textT">T</span><span
+            id="textUE">UE</span><span id="textWED">WED</span><span id="textSUN">SUN</span><span
+            id="textFRI">FRI</span><span
+            id="textMON">MON</span><span id="text_10">_</span><span id="textJAN">JAN</span><br>
+        <span id="textFEB">FEB</span><span id="textMAR">MAR</span><span id="textAPR">APR</span><span
+            id="textMAY">MAY</span><span id="textOCT">OCT</span><span id="textJUL">JUL</span><span
+            id="textAUG">AUG</span><span
+            id="textSEP">SEP</span><br>
+        <span id="textNOV">NOV</span><span id="textJUN">JUN</span><span id="textDEC">DEC</span><span
+            id="text_11">_</span><span id="text2TEN">2</span><span id="text1TEN">1</span><span
+            id="text3TEN">3</span><span id="text_12">_</span><span id="text2">2</span><span
+            id="text5">5</span><span id="text8">8</span><span id="text3">3</span><span id="text4">4</span><span
+            id="text0">0</span><span id="text6">6</span><span id="text9">9</span><span id="text1">1</span><span
+            id="text7">7</span><br>
+    </div>
+</div>
+<DIV id="message">Talk to me</DIV>
+<script type="text/javascript" src="//www.gstatic.com/cast/sdk/libs/receiver/2.0.0/cast_receiver.js"></script>
+<script type="text/javascript">
+    window.onload = function () {
+        cast.receiver.logger.setLevelValue(0);
+        window.castReceiverManager = cast.receiver.CastReceiverManager.getInstance();
+        console.log('Starting Receiver Manager');
+
+        // handler for the 'ready' event
+        castReceiverManager.onReady = function (event) {
+            console.log('Received Ready event: ' + JSON.stringify(event.data));
+            window.castReceiverManager.setApplicationState("Application status is ready...");
+        };
+
+        // handler for 'senderconnected' event
+        castReceiverManager.onSenderConnected = function (event) {
+            console.log('Received Sender Connected event: ' + event.data);
+            console.log(window.castReceiverManager.getSender(event.data).userAgent);
+        };
+
+        // handler for 'senderdisconnected' event
+        castReceiverManager.onSenderDisconnected = function (event) {
+            console.log('Received Sender Disconnected event: ' + event.data);
+            if (window.castReceiverManager.getSenders().length == 0) {
+                window.close();
+            }
+        };
+
+        // handler for 'systemvolumechanged' event
+        castReceiverManager.onSystemVolumeChanged = function (event) {
+            console.log('Received System Volume Changed event: ' + event.data['level'] + ' ' +
+                    event.data['muted']);
+        };
+
+        // create a CastMessageBus to handle messages for a custom namespace
+        window.messageBus =
+                window.castReceiverManager.getCastMessageBus(
+                        'urn:x-cast:com.google.cast.sample.helloworld');
+
+        // handler for the CastMessageBus message event
+        window.messageBus.onMessage = function (event) {
+            console.log('Message [' + event.senderId + ']: ' + event.data);
+            // display the message from the sender
+            displayText(event.data);
+            // inform all senders on the CastMessageBus of the incoming message event
+            // sender message listener will be invoked
+            window.messageBus.send(event.senderId, event.data);
+        }
+
+        // initialize the CastReceiverManager with an application status message
+        window.castReceiverManager.start({statusText: "Application is starting"});
+        console.log('Receiver Manager started');
+    };
+
+    // utility function to display the text message in the input field
+    function displayText(text) {
+        console.log(text);
+        document.getElementById("message").innerHTML = text;
+        window.castReceiverManager.setApplicationState(text);
+    }
+    ;
+</script>
+</body>
+</html>
