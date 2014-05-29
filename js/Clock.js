@@ -208,8 +208,8 @@ Clock.prototype.updateColors = function () {
     sheet.deleteRule(0);
     sheet.deleteRule(0);
 
-    var bodyRule = 'body { background-color: ' + settings.display.color.background + '; color: ' + settings.display.color.inactive + '; }';
-    var activeRule = '.active { color: ' + settings.display.color.active + '; }';
+    var bodyRule = 'body { background-color: ' + this.settings.display.color.background + '; color: ' + this.settings.display.color.inactive + '; }';
+    var activeRule = '.active { color: ' + this.settings.display.color.active + '; }';
 
     sheet.insertRule(bodyRule, 0);
     sheet.insertRule(activeRule, 1);
@@ -225,14 +225,14 @@ Clock.prototype.start = function () {
         if (this.interval == null) {
             console.error("can't start, interval is not null");
         } else {
-            setInterval(this.tick.bind(this), settings.time.duration);
+            setInterval(this.tick.bind(this), this.settings.time.duration);
         }
     }
 };
 
-Clock.prototype.updateClock = function () {
-    var minute = this.settings.time.now.getMinutes();
-    var hour = this.settings.time.now.getHours();
+Clock.prototype.updateClock = function (date) {
+    var minute = date.getMinutes();
+    var hour = date.getHours();
     var am = true;
     if (hour >= 12) {
         hour -= 12;
@@ -245,9 +245,9 @@ Clock.prototype.updateClock = function () {
     this.allOff();
     this.on(this.ITS);
     this.setTime(hour, minute, am);
-    this.setDayOfWeek(this.settings.time.now.getDay());
-    this.setDayOfMonth(this.settings.time.now.getDate());
-    this.setMonth(this.settings.time.now.getMonth());
+    this.setDayOfWeek(date.getDay());
+    this.setDayOfMonth(date.getDate());
+    this.setMonth(date.getMonth());
 };
 
 Clock.prototype.allOff = function() {
@@ -537,8 +537,7 @@ Clock.prototype.tick = function () {
 };
 
 Clock.prototype.initialize = function () {
-    settings = JSON.parse(JSON.stringify(Clock.defaults));
-
-    this.setTime(settings.time.now);
-    this.start(settings.time.run);
+    this.settings = JSON.parse(JSON.stringify(Clock.defaults));
+    this.updateClock(this.settings.time.now);
+    //this.start();
 };
