@@ -108,7 +108,7 @@ sender.sendMessage = function(message) {
     }
 };
 
-sender.updateColor = function() {
+sender.updateColors = function() {
     var settings = {
         display : {
             color : {
