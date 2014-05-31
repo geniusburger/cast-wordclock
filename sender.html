@@ -26,43 +26,32 @@ limitations under the License.
 <body>
 <table id="colors">
     <colgroup>
-        <col style="width: 33%" />
-        <col style="width: 33%" />
-        <col style="width: 33%" />
+        <col style="width: 33%"/>
+        <col style="width: 33%"/>
+        <col style="width: 33%"/>
     </colgroup>
     <thead>
-        <tr>
-            <th colspan="3">Color</th>
-        </tr>
-        <tr>
-            <th align="center"><label for="backgroundColor">Background</label></th>
-            <th align="center"><label for="activeColor">Active</label></th>
-            <th align="center"><label for="inactiveColor">Inactive</label></th>
-        </tr>
+    <tr>
+        <th colspan="3">Color</th>
+    </tr>
+    <tr>
+        <th align="center"><label for="backgroundColor">Background</label></th>
+        <th align="center"><label for="activeColor">Active</label></th>
+        <th align="center"><label for="inactiveColor">Inactive</label></th>
+    </tr>
     </thead>
     <tbody>
-        <tr>
-            <td align="center"><input id="backgroundColor" class="color" size="6"></td>
-            <td align="center"><input id="activeColor" class="color" size="6"></td>
-            <td align="center"><input id="inactiveColor" class="color" size="6"></td>
-        </tr>
+    <tr>
+        <td align="center"><input id="backgroundColor" class="color" size="6"></td>
+        <td align="center"><input id="activeColor" class="color" size="6"></td>
+        <td align="center"><input id="inactiveColor" class="color" size="6"></td>
+    </tr>
     </tbody>
 </table>
-<table id="wrapper">
-    <tr>
-        <td>
-            <form method="get" action="JavaScript:update();">
-                <input id="input" class="border" type="text" size="30" onwebkitspeechchange="transcribe(this.value)"
-                       x-webkit-speech/>
-            </form>
-        </td>
-    </tr>
-</table>
 
-<!-- Debbugging output -->
-<div style="margin:10px; visibility:hidden;">
-    <textarea rows="20" cols="70" id="debugmessage">
-    </textarea>
+<div style="margin:10px;">
+    <label for="debugmessage" style="display:none;">Debug</label>
+    <textarea rows="20" cols="70" id="debugmessage"></textarea>
 </div>
 
 <script type="text/javascript">

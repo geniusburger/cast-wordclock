@@ -4,13 +4,6 @@ sender.namespace = 'urn:x-cast:me.geniusburger.cast.wordclock';
 sender.session = null;
 
 /**
- * Call initialization for Cast
- */
-if (!chrome.cast || !chrome.cast.isAvailable) {
-    setTimeout(sender.initializeCastApi, 1000);
-}
-
-/**
  * initialization
  */
 sender.initializeCastApi = function() {
@@ -131,6 +124,10 @@ sender.init = function() {
     document.getElementById('activeColor').value = Clock.defaults.display.color.active;
     document.getElementById('inactiveColor').value = Clock.defaults.display.color.inactive;
     jscolor.init();
+
+    if (!chrome.cast || !chrome.cast.isAvailable) {
+        setTimeout(sender.initializeCastApi, 1000);
+    }
 };
 
 sender.addEvent = function(el, evnt, func) {
