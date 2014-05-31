@@ -3,6 +3,9 @@
 <head>
     <title>Word Clock</title>
     <link rel="stylesheet" href="css/receiver.css">
+    <script type="text/javascript" src="//www.gstatic.com/cast/sdk/libs/receiver/2.0.0/cast_receiver.js"></script>
+    <script type="text/javascript" src="js/Clock.js"></script>
+    <script type="text/javascript" src="js/receiver.js"></script>
 </head>
 <body>
 <div id="clock">
@@ -47,8 +50,9 @@
         id="text0">0</span><span id="text6">6</span><span id="text9">9</span><span id="text1">1</span><span
         id="text7">7</span><br>
 </div>
-<script type="text/javascript" src="//www.gstatic.com/cast/sdk/libs/receiver/2.0.0/cast_receiver.js"></script>
-<script type="text/javascript" src="js/Clock.js"></script>
-<script type="text/javascript" src="js/receiver.js"></script>
+<div style="margin:10px;">
+    <label for="debugmessage" style="display:none;">Debug</label>
+    <textarea rows="20" cols="70" id="debugmessage"></textarea>
+</div>
 </body>
 </html>

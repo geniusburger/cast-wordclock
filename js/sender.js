@@ -19,35 +19,35 @@ sender.initializeCastApi = function() {
  * initialization success callback
  */
 sender.onInitSuccess = function() {
-    sender.appendMessage("onInitSuccess");
+    sender.log("onInitSuccess");
 };
 
 /**
  * initialization error callback
  */
 sender.onError = function(message) {
-    sender.appendMessage("onError: " + JSON.stringify(message));
+    sender.log("onError: " + JSON.stringify(message));
 };
 
 /**
  * generic success callback
  */
 sender.onSuccess = function(message) {
-    sender.appendMessage("onSuccess: " + message);
+    sender.log("onSuccess: " + message);
 };
 
 /**
  * callback on success for stopping app
  */
 sender.onStopAppSuccess = function() {
-    sender.appendMessage('onStopAppSuccess');
+    sender.log('onStopAppSuccess');
 };
 
 /**
  * session listener during initialization
  */
 sender.sessionListener = function(e) {
-    sender.appendMessage('New session ID:' + e.sessionId);
+    sender.log('New session ID:' + e.sessionId);
     sender.session = e;
     sender.session.addUpdateListener(sender.sessionUpdateListener);
     sender.session.addMessageListener(sender.namespace, sender.receiverMessage);
@@ -59,7 +59,7 @@ sender.sessionListener = function(e) {
 sender.sessionUpdateListener = function(isAlive) {
     var message = isAlive ? 'Session Updated' : 'Session Removed';
     message += ': ' + sender.session.sessionId;
-    sender.appendMessage(message);
+    sender.log(message);
     if (!isAlive) {
         sender.session = null;
     }
@@ -71,7 +71,7 @@ sender.sessionUpdateListener = function(isAlive) {
  * @param {string} message A message string
  */
 sender.receiverMessage = function(namespace, message) {
-    sender.appendMessage("receiverMessage: " + namespace + ", " + message);
+    sender.log("receiverMessage: " + namespace + ", " + message);
 };
 
 /**
@@ -79,10 +79,10 @@ sender.receiverMessage = function(namespace, message) {
  */
 sender.receiverListener = function(e) {
     if (e === 'available') {
-        sender.appendMessage("receiver found");
+        sender.log("receiver found");
     }
     else {
-        sender.appendMessage("receiver list empty");
+        sender.log("receiver list empty");
     }
 };
 
@@ -110,12 +110,44 @@ sender.sendMessage = function(message) {
     }
 };
 
-/**
- * utility function to handle text typed in by user in the input field
- */
-sender.update = function() {
-    sender.sendMessage(document.getElementById("input").value);
-    // TODO
+sender.updateColor = function() {
+    var settings = {
+        display : {
+            color : {
+                background : document.getElementById('backgroundColor').value,
+                active : document.getElementById('activeColor').value,
+                inactive : document.getElementById('inactiveColor').value
+            }
+        }
+    };
+
+    sender.sendMessage(settings);
+};
+
+sender.updateRunOrStop = function(runClock) {
+    var settings = {
+        time : {
+            run: runClock
+        }
+    };
+
+    sender.sendMessage(settings);
+};
+
+sender.updateDuration = function() {
+    var settings = {
+        time : {
+            duration : document.getElementById('duration').value
+        }
+    };
+
+    sender.sendMessage(settings);
+};
+
+sender.log = function(message) {
+    console.log(message);
+    var dw = document.getElementById("debugmessage");
+    dw.innerHTML = '\n' + JSON.stringify(message);
 };
 
 sender.init = function() {

@@ -49,13 +49,14 @@ limitations under the License.
     </tbody>
 </table>
 
+<button type="button" onclick="sender.updateColors()">Update Colors</button><br>
+<input type="text" id="duration" value="1000"><button type="button" onclick="sender.updateDuration()">Update Duration</button><br>
+<button type="button" onclick="sender.updateRunOrStop(true)">Run</button><br>
+<button type="button" onclick="sender.updateRunOrStop(false)">Stop</button><br>
+
 <div style="margin:10px;">
     <label for="debugmessage" style="display:none;">Debug</label>
     <textarea rows="20" cols="70" id="debugmessage"></textarea>
 </div>
-
-<script type="text/javascript">
-    document.getElementById("input").focus();
-</script>
 </body>
 </html>
