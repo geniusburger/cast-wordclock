@@ -1,5 +1,5 @@
 sender = {};
-sender.applicationID = '794B7BBF';
+sender.applicationID = '8D74C526';
 sender.namespace = 'urn:x-cast:me.geniusburger.cast.wordclock';
 sender.session = null;
 
@@ -8,10 +8,7 @@ sender.session = null;
  */
 sender.initializeCastApi = function() {
     var sessionRequest = new chrome.cast.SessionRequest(sender.applicationID);
-    var apiConfig = new chrome.cast.ApiConfig(sessionRequest,
-        sender.sessionListener,
-        sender.receiverListener);
-
+    var apiConfig = new chrome.cast.ApiConfig(sessionRequest, sender.sessionListener, sender.receiverListener);
     chrome.cast.initialize(apiConfig, sender.onInitSuccess, sender.onError);
 };
 
@@ -78,11 +75,12 @@ sender.receiverMessage = function(namespace, message) {
  * receiver listener during initialization
  */
 sender.receiverListener = function(e) {
-    if (e === 'available') {
+    if (e === chrome.cast.ReceiverAvailability.AVAILABLE) {
         sender.log("receiver found");
+        chrome.cast.requestSession(sender.sessionListener, sender.error);
     }
     else {
-        sender.log("receiver list empty");
+        sender.log("receiver list empty, " + e);
     }
 };
 
@@ -156,13 +154,15 @@ sender.init = function() {
     document.getElementById('activeColor').value = Clock.defaults.display.color.active;
     document.getElementById('inactiveColor').value = Clock.defaults.display.color.inactive;
     jscolor.init();
-
-    if (!chrome.cast || !chrome.cast.isAvailable) {
-        setTimeout(sender.initializeCastApi, 1000);
-    } else {
-        sender.initializeCastApi();
-    }
 };
+
+window['__onGCastApiAvailable'] = function(loaded, errorInfo) {
+    if (loaded) {
+        sender.initializeCastApi();
+    } else {
+        sender.log(errorInfo);
+    }
+}
 
 sender.addEvent = function(el, evnt, func) {
     if(el.addEventListener) {

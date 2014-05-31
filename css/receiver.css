@@ -20,6 +20,6 @@ html, body {
 #clock {
     font-family: monospace;
     font-size: 200%;
-    margin: auto 0;
+    margin-top: 20px;
     vertical-align: middle;
 }
