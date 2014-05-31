@@ -39,6 +39,24 @@ util.removeChildren = function(parent) {
     }
 };
 
+util.isValidObject = function(test, valid, logger, tab) {
+    if( typeof tab === 'undefined') {
+        tab = '';
+    }
+    if( typeof test !== 'string' && typeof valid !== 'string') {
+        for (var key in valid) {
+            if (valid.hasOwnProperty(key)) {
+                logger.log(tab + key);
+                if (!test.hasOwnProperty(key) || !util.isValidObject(test[key], valid[key], logger, tab + '\t')) {
+                    logger.log(tab + 'invalid');
+                    return false;
+                }
+            }
+        }
+    }
+    return true;
+};
+
 util.getNumberWithCommas = function(num) {
     return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 };

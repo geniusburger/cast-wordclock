@@ -61,6 +61,7 @@ sender.sessionUpdateListener = function(isAlive) {
     sender.log(message);
     if (!isAlive) {
         sender.session = null;
+        sender.disableControls(true);
     }
 };
 
@@ -73,7 +74,7 @@ sender.receiverMessage = function(namespace, message) {
     sender.log("receiverMessage: " + namespace + ", " + message);
     if( namespace === sender.namespace) {
         var test = JSON.parse(message);
-        if( sender.isValidObject(test, Clock.defaults)) {
+        if( util.isValidObject(test, Clock.defaults, sender)) {
             util.setCookie('settings', message);
             sender.loadSettings(test);
         }
@@ -82,27 +83,22 @@ sender.receiverMessage = function(namespace, message) {
 
 sender.loadSettings = function(settings) {
     sender.lastCookie = settings;
+    sender.disableControls(false, settings);
     document.getElementById('backgroundColor').value = settings.display.color.background;
     document.getElementById('activeColor').value = settings.display.color.active;
     document.getElementById('inactiveColor').value = settings.display.color.inactive;
+    document.getElementById('duration').value = settings.time.duration;
 };
 
-sender.isValidObject = function(test, valid, tab) {
-    if( typeof tab === 'undefined') {
-        tab = '';
-    }
-    if( typeof test !== 'string' && typeof valid !== 'string') {
-        for (var key in valid) {
-            if (valid.hasOwnProperty(key)) {
-                sender.log(tab + key);
-                if (!test.hasOwnProperty(key) || !sender.isValidObject(test[key], valid[key], tab + '\t')) {
-                    sender.log(tab + 'invalid');
-                    return false;
-                }
-            }
-        }
-    }
-    return true;
+sender.disableControls = function(disable, settings) {
+    document.getElementById('backgroundColor').disabled = disable;
+    document.getElementById('activeColor').disabled = disable;
+    document.getElementById('inactiveColor').disabled = disable;
+    document.getElementById('updateColors').disabled = disable;
+    document.getElementById('duration').disabled = disable;
+    document.getElementById('updateDuration').disabled = disable;
+    document.getElementById('run').disabled = disable || settings.time.run;
+    document.getElementById('stop').disabled = disable || !settings.time.run;
 };
 
 /**
@@ -195,6 +191,7 @@ sender.init = function() {
         cookie = JSON.parse(cookie);
     }
     sender.loadSettings(cookie);
+    sender.disableControls(true);
     jscolor.init();
 };
 
