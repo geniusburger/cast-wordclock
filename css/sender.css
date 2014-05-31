@@ -12,6 +12,16 @@ label {
     color: white;
 }
 
+.wrapper {
+    border: 2px solid black;
+    border-radius: 5px;
+}
+
+.wrapper.error {
+    background-color: #AA0000;
+    border-color: #AA0000;
+}
+
 #controls {
     margin: 20px auto;
 }
