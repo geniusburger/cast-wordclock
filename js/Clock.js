@@ -127,13 +127,13 @@ Clock.prototype.updateSettings = function (updates) {
         return;
     }
 
-    if ('time' in updates) {
+    if (updates.hasOwnProperty('time')) {
         this.stop();
         if (updates.time.now instanceof Date) {
             this.settings.time.now = updates.time.now;
             this.setTime();
         }
-        if ('duration' in updates.time) {
+        if (updates.time.hasOwnProperty('duration')) {
             var duration = parseInt(updates.time.duration);
             if (!isNaN(duration) && duration > 0) {
                 this.settings.time.duration = duration;
@@ -145,8 +145,8 @@ Clock.prototype.updateSettings = function (updates) {
         this.start();
     }
 
-    if ('display' in updates) {
-        if ('color' in updates.display) {
+    if (updates.hasOwnProperty('display')) {
+        if (updates.display.hasOwnProperty('color')) {
             var reColor = false;
 
             var color = this.isValidColor(updates.display.color.background);
@@ -179,7 +179,7 @@ Clock.prototype.updateSettings = function (updates) {
         }
     }
 
-    if ('sound' in updates) {
+    if (updates.hasOwnProperty('sound')) {
         if (typeof updates.sound.minute == 'string') {
             // TODO
         }
@@ -203,7 +203,7 @@ Clock.prototype.isValidColor = function (color) {
     }
     var colors = /^#?([0-9A-Fa-f]{3}){1,2}$/.exec(color);
     if (Array.isArray(colors)) {
-        color = '#' + colors[0];
+        color = colors[0];
     }
     return color;
 };
@@ -214,8 +214,8 @@ Clock.prototype.updateColors = function () {
     sheet.deleteRule(0);
     sheet.deleteRule(0);
 
-    var bodyRule = 'body { background-color: ' + this.settings.display.color.background + '; color: ' + this.settings.display.color.inactive + '; }';
-    var activeRule = '.active { color: ' + this.settings.display.color.active + '; }';
+    var bodyRule = 'body { background-color: #' + this.settings.display.color.background + '; color: #' + this.settings.display.color.inactive + '; }';
+    var activeRule = '.active { color: #' + this.settings.display.color.active + '; }';
 
     sheet.insertRule(bodyRule, 0);
     sheet.insertRule(activeRule, 1);

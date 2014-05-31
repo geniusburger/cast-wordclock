@@ -2,6 +2,7 @@ sender = {};
 sender.applicationID = '8D74C526';
 sender.namespace = 'urn:x-cast:me.geniusburger.cast.wordclock';
 sender.session = null;
+sender.lastCookie = null;
 
 /**
  * initialization
@@ -48,6 +49,7 @@ sender.sessionListener = function(e) {
     sender.session = e;
     sender.session.addUpdateListener(sender.sessionUpdateListener);
     sender.session.addMessageListener(sender.namespace, sender.receiverMessage);
+    sender.sendMessage(sender.lastCookie);
 };
 
 /**
@@ -70,26 +72,34 @@ sender.sessionUpdateListener = function(isAlive) {
 sender.receiverMessage = function(namespace, message) {
     sender.log("receiverMessage: " + namespace + ", " + message);
     if( namespace === sender.namespace) {
-        var valid = Clock.defaults;
         var test = JSON.parse(message);
-        if( sender.isValidObject(test, valid)) {
-            // TODO
+        if( sender.isValidObject(test, Clock.defaults)) {
+            util.setCookie('settings', message);
+            sender.loadSettings(test);
         }
     }
+};
+
+sender.loadSettings = function(settings) {
+    sender.lastCookie = settings;
+    document.getElementById('backgroundColor').value = settings.display.color.background;
+    document.getElementById('activeColor').value = settings.display.color.active;
+    document.getElementById('inactiveColor').value = settings.display.color.inactive;
 };
 
 sender.isValidObject = function(test, valid, tab) {
     if( typeof tab === 'undefined') {
         tab = '';
     }
-    for( var key in valid) {
-        if( valid.hasOwnProperty(key)) {
-            sender.log(tab + 'valid ' + key);
-            if( !test.hasOwnProperty(key) || !sender.isValidObject(test[key], valid[key], tab + '\t')) {
-                sender.log(tab + 'invalid');
-                return false;
+    if( typeof test !== 'string' && typeof valid !== 'string') {
+        for (var key in valid) {
+            if (valid.hasOwnProperty(key)) {
+                sender.log(tab + key);
+                if (!test.hasOwnProperty(key) || !sender.isValidObject(test[key], valid[key], tab + '\t')) {
+                    sender.log(tab + 'invalid');
+                    return false;
+                }
             }
-            sender.log(tab + 'test');
         }
     }
     return true;
@@ -178,9 +188,13 @@ sender.log = function(message) {
 
 sender.init = function() {
     sender.log("init");
-    document.getElementById('backgroundColor').value = Clock.defaults.display.color.background;
-    document.getElementById('activeColor').value = Clock.defaults.display.color.active;
-    document.getElementById('inactiveColor').value = Clock.defaults.display.color.inactive;
+    var cookie = util.getCookie('settings');
+    if(cookie == null) {
+        cookie = Clock.defaults;
+    } else {
+        cookie = JSON.parse(cookie);
+    }
+    sender.loadSettings(cookie);
     jscolor.init();
 };
 
