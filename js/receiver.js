@@ -52,7 +52,7 @@ rcvr.castInit = function () {
 rcvr.log = function(message) {
     console.log(message);
     var dw = document.getElementById("debugmessage");
-    dw.innerHTML = '\n' + JSON.stringify(message);
+    dw.innerHTML += '\n' + JSON.stringify(message);
 };
 
 rcvr.receiverInit = function () {

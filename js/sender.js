@@ -9,8 +9,8 @@ sender.session = null;
 sender.initializeCastApi = function() {
     var sessionRequest = new chrome.cast.SessionRequest(sender.applicationID);
     var apiConfig = new chrome.cast.ApiConfig(sessionRequest,
-        sessionListener,
-        receiverListener);
+        sender.sessionListener,
+        sender.receiverListener);
 
     chrome.cast.initialize(apiConfig, sender.onInitSuccess, sender.onError);
 };
@@ -147,11 +147,11 @@ sender.updateDuration = function() {
 sender.log = function(message) {
     console.log(message);
     var dw = document.getElementById("debugmessage");
-    dw.innerHTML = '\n' + JSON.stringify(message);
+    dw.innerHTML += '\n' + JSON.stringify(message);
 };
 
 sender.init = function() {
-    console.log("init");
+    sender.log("init");
     document.getElementById('backgroundColor').value = Clock.defaults.display.color.background;
     document.getElementById('activeColor').value = Clock.defaults.display.color.active;
     document.getElementById('inactiveColor').value = Clock.defaults.display.color.inactive;
@@ -159,6 +159,8 @@ sender.init = function() {
 
     if (!chrome.cast || !chrome.cast.isAvailable) {
         setTimeout(sender.initializeCastApi, 1000);
+    } else {
+        sender.initializeCastApi();
     }
 };
 
