@@ -27,6 +27,9 @@ limitations under the License.
 <body>
 <table id="controls">
     <tr>
+        <td colspan="2" align="center"><label id="status">Disconnected</label></td>
+    </tr>
+    <tr>
         <td align="right"><label for="backgroundColor">Background</label></td>
         <td align="center"><input id="backgroundColor" class="color border" size="6" disabled></td>
     </tr>
@@ -39,10 +42,10 @@ limitations under the License.
         <td align="center"><input id="inactiveColor" class="color border" size="6" disabled></td>
     </tr>
     <tr>
-        <td colspan="2"><input type="button" id="updateColors" onclick="sender.updateColors()" value="Update Colors" disabled></td>
+        <td colspan="2"><button type="button" id="updateColors" class="border" onclick="sender.updateColors()" disabled>Update Colors</button></td>
     </tr>
     <tr>
-        <td colspan="2"><input type="button" id="run" onclick="sender.updateRunOrStop()" value="Run" disabled></td>
+        <td colspan="2"><button type="button" id="run" class="border" onclick="sender.updateRunOrStop()" disabled>Run</button></td>
     </tr>
 </table>
 

@@ -21,28 +21,6 @@ label {
     font-size: 200%;
 }
 
-input[type=button] {
-    background-color: #888888;
-    width: 100%;
-    font-size: 125%;
-    border: 2px solid #cccccc;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-input[type=button]:active {
-    background-color: #666666;
-}
-
-input[type=button]:hover {
-    background-color: #BBBBBB;
-}
-
-input[type=button]:disabled {
-    background-color: #555555;
-    cursor: default;
-}
-
 #debugSection {
     font-size: 100%;
 }
@@ -56,4 +34,30 @@ input[type=button]:disabled {
     outline: none;
     border-color: #8ecaed;
     box-shadow: 0 0 5px #8ecaed;
+}
+
+button {
+    background-color: #888888;
+    width: 100%;
+    font-size: 125%;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #CCCCCC;
+}
+
+button:active {
+    background-color: #0091FF;
+}
+
+button:disabled {
+    background-color: #555555;
+    cursor: default;
+}
+
+button.border:focus {
+    outline: none;
+    border-color: #cccccc;
+    box-shadow: none;
 }

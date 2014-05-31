@@ -7,7 +7,8 @@ sender.lastCookie = null;
 /**
  * initialization
  */
-sender.initializeCastApi = function() {
+sender.initializeCastApi = function () {
+    sender.setStatus('Initializing');
     var sessionRequest = new chrome.cast.SessionRequest(sender.applicationID);
     var apiConfig = new chrome.cast.ApiConfig(sessionRequest, sender.sessionListener, sender.receiverListener);
     chrome.cast.initialize(apiConfig, sender.onInitSuccess, sender.onError);
@@ -16,35 +17,38 @@ sender.initializeCastApi = function() {
 /**
  * initialization success callback
  */
-sender.onInitSuccess = function() {
+sender.onInitSuccess = function () {
     sender.log("onInitSuccess");
+    sender.setStatus('Initialized');
 };
 
 /**
  * initialization error callback
  */
-sender.onError = function(message) {
+sender.onError = function (message) {
+    sender.setStatus('Initialize Error');
     sender.log("onError: " + JSON.stringify(message));
 };
 
 /**
  * generic success callback
  */
-sender.onSuccess = function(message) {
+sender.onSuccess = function (message) {
     sender.log("onSuccess: " + message);
 };
 
 /**
  * callback on success for stopping app
  */
-sender.onStopAppSuccess = function() {
+sender.onStopAppSuccess = function () {
     sender.log('onStopAppSuccess');
 };
 
 /**
  * session listener during initialization
  */
-sender.sessionListener = function(e) {
+sender.sessionListener = function (e) {
+    sender.setStatus('Connected');
     sender.log('New session ID:' + e.sessionId);
     sender.session = e;
     sender.session.addUpdateListener(sender.sessionUpdateListener);
@@ -55,11 +59,11 @@ sender.sessionListener = function(e) {
 /**
  * listener for session updates
  */
-sender.sessionUpdateListener = function(isAlive) {
-    var message = isAlive ? 'Session Updated' : 'Session Removed';
-    message += ': ' + sender.session.sessionId;
+sender.sessionUpdateListener = function (isAlive) {
+    var message = (isAlive ? 'Session Updated' : 'Session Removed') + ': ' + sender.session.sessionId;
     sender.log(message);
-    if (!isAlive) {
+    if( !isAlive) {
+        sender.setStatus('Disconnected');
         sender.session = null;
         sender.disableControls(true);
     }
@@ -70,28 +74,28 @@ sender.sessionUpdateListener = function(isAlive) {
  * @param {string} namespace The namespace of the message
  * @param {string} message A message string
  */
-sender.receiverMessage = function(namespace, message) {
+sender.receiverMessage = function (namespace, message) {
     sender.log("receiverMessage: " + namespace + ", " + message);
-    if( namespace === sender.namespace) {
+    if (namespace === sender.namespace) {
         var test = JSON.parse(message);
-        if( util.isValidObject(test, Clock.defaults, sender)) {
+        if (util.isValidObject(test, Clock.defaults, sender)) {
             util.setCookie('settings', message);
             sender.loadSettings(test);
         }
     }
 };
 
-sender.loadSettings = function(settings) {
+sender.loadSettings = function (settings) {
     sender.lastCookie = settings;
     sender.disableControls(false, settings);
     document.getElementById('backgroundColor').value = settings.display.color.background;
     document.getElementById('activeColor').value = settings.display.color.active;
     document.getElementById('inactiveColor').value = settings.display.color.inactive;
     document.getElementById('duration').value = settings.time.duration;
-    document.getElementById('run').value = settings.time.run ? 'Stop' : 'Run';
+    document.getElementById('run').innerHTML = settings.time.run ? 'Stop' : 'Run';
 };
 
-sender.disableControls = function(disable, settings) {
+sender.disableControls = function (disable, settings) {
     document.getElementById('backgroundColor').disabled = disable;
     document.getElementById('activeColor').disabled = disable;
     document.getElementById('inactiveColor').disabled = disable;
@@ -104,7 +108,7 @@ sender.disableControls = function(disable, settings) {
 /**
  * receiver listener during initialization
  */
-sender.receiverListener = function(e) {
+sender.receiverListener = function (e) {
     if (e === chrome.cast.ReceiverAvailability.AVAILABLE) {
         sender.log("receiver found");
         chrome.cast.requestSession(sender.sessionListener, sender.error);
@@ -117,7 +121,7 @@ sender.receiverListener = function(e) {
 /**
  * stop app/session
  */
-sender.stopApp = function() {
+sender.stopApp = function () {
     sender.session.stop(sender.onStopAppSuccess, sender.onError);
 };
 
@@ -126,7 +130,7 @@ sender.stopApp = function() {
  * receiver CastMessageBus message handler will be invoked
  * @param {string} message A message string
  */
-sender.sendMessage = function(message) {
+sender.sendMessage = function (message) {
     if (sender.session != null) {
         sender.session.sendMessage(sender.namespace, message, sender.onSuccess.bind(this, "Message sent: " + message), sender.onError);
     }
@@ -138,13 +142,13 @@ sender.sendMessage = function(message) {
     }
 };
 
-sender.updateColors = function() {
+sender.updateColors = function () {
     var settings = {
-        display : {
-            color : {
-                background : document.getElementById('backgroundColor').value,
-                active : document.getElementById('activeColor').value,
-                inactive : document.getElementById('inactiveColor').value
+        display: {
+            color: {
+                background: document.getElementById('backgroundColor').value,
+                active: document.getElementById('activeColor').value,
+                inactive: document.getElementById('inactiveColor').value
             }
         }
     };
@@ -152,9 +156,9 @@ sender.updateColors = function() {
     sender.sendMessage(settings);
 };
 
-sender.updateRunOrStop = function() {
+sender.updateRunOrStop = function () {
     var settings = {
-        time : {
+        time: {
             run: !sender.lastCookie.time.run
         }
     };
@@ -162,30 +166,35 @@ sender.updateRunOrStop = function() {
     sender.sendMessage(settings);
 };
 
-sender.updateDuration = function() {
+sender.updateDuration = function () {
     var settings = {
-        time : {
-            duration : document.getElementById('duration').value
+        time: {
+            duration: document.getElementById('duration').value
         }
     };
 
     sender.sendMessage(settings);
 };
 
-sender.log = function(message) {
+sender.log = function (message) {
     console.log(message);
     var dw = document.getElementById("debugmessage");
-    if( typeof message === 'object') {
+    if (typeof message === 'object') {
         message = JSON.stringify(message);
     }
     dw.innerHTML += '\n' + message;
     dw.scrollTop = dw.scrollHeight;
 };
 
-sender.init = function() {
-    sender.log("init");
+sender.setStatus = function (status) {
+    document.getElementById('status').innerHTML = status;
+};
+
+sender.init = function () {
+    sender.log('init');
+    sender.setStatus('Loading');
     var cookie = util.getCookie('settings');
-    if(cookie == null) {
+    if (cookie == null) {
         cookie = Clock.defaults;
     } else {
         cookie = JSON.parse(cookie);
@@ -195,19 +204,19 @@ sender.init = function() {
     jscolor.init();
 };
 
-window['__onGCastApiAvailable'] = function(loaded, errorInfo) {
+window['__onGCastApiAvailable'] = function (loaded, errorInfo) {
     if (loaded) {
         sender.initializeCastApi();
     } else {
         sender.log(errorInfo);
     }
-}
+};
 
-sender.addEvent = function(el, evnt, func) {
-    if(el.addEventListener) {
+sender.addEvent = function (el, evnt, func) {
+    if (el.addEventListener) {
         el.addEventListener(evnt, func, false);
-    } else if(el.attachEvent) {
-        el.attachEvent('on'+evnt, func);
+    } else if (el.attachEvent) {
+        el.attachEvent('on' + evnt, func);
     }
 };
 
