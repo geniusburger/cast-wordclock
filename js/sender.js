@@ -48,7 +48,7 @@ sender.onStopAppSuccess = function () {
  * session listener during initialization
  */
 sender.sessionListener = function (e) {
-    sender.setStatus('Connected', true);
+    sender.setStatus('Connected');
     sender.log('New session ID:' + e.sessionId);
     sender.session = e;
     sender.session.addUpdateListener(sender.sessionUpdateListener);
