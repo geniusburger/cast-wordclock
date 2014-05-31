@@ -133,13 +133,13 @@ Clock.prototype.updateSettings = function (updates) {
             this.settings.time.now = updates.time.now;
             this.setTime();
         }
-        if (typeof updates.time.duration == 'number') {
+        if (typeof updates.time.duration !== 'undefined') {
             var duration = parseInt(updates.time.duration);
             if (!isNaN(duration) && duration > 0) {
                 this.settings.time.duration = duration;
             }
         }
-        if (typeof updates.time.run == 'boolean') {
+        if (typeof updates.time.run === 'boolean') {
             this.settings.time.run = updates.time.run;
         }
         this.start();
