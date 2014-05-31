@@ -69,6 +69,30 @@ sender.sessionUpdateListener = function(isAlive) {
  */
 sender.receiverMessage = function(namespace, message) {
     sender.log("receiverMessage: " + namespace + ", " + message);
+    if( namespace === sender.namespace) {
+        var valid = Clock.defaults;
+        var test = JSON.parse(message);
+        if( sender.isValidObject(test, valid)) {
+            // TODO
+        }
+    }
+};
+
+sender.isValidObject = function(test, valid, tab) {
+    if( typeof tab === 'undefined') {
+        tab = '';
+    }
+    for( var key in valid) {
+        if( valid.hasOwnProperty(key)) {
+            sender.log(tab + 'valid ' + key);
+            if( !test.hasOwnProperty(key) || !sender.isValidObject(test[key], valid[key], tab + '\t')) {
+                sender.log(tab + 'invalid');
+                return false;
+            }
+            sender.log(tab + 'test');
+        }
+    }
+    return true;
 };
 
 /**
@@ -145,7 +169,10 @@ sender.updateDuration = function() {
 sender.log = function(message) {
     console.log(message);
     var dw = document.getElementById("debugmessage");
-    dw.innerHTML += '\n' + JSON.stringify(message);
+    if( typeof message === 'object') {
+        message = JSON.stringify(message);
+    }
+    dw.innerHTML += '\n' + message;
     dw.scrollTop = dw.scrollHeight;
 };
 

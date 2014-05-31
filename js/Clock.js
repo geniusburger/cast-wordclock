@@ -127,13 +127,13 @@ Clock.prototype.updateSettings = function (updates) {
         return;
     }
 
-    if (updates.time) {
+    if ('time' in updates) {
         this.stop();
         if (updates.time.now instanceof Date) {
             this.settings.time.now = updates.time.now;
             this.setTime();
         }
-        if (typeof updates.time.duration !== 'undefined') {
+        if ('duration' in updates.time) {
             var duration = parseInt(updates.time.duration);
             if (!isNaN(duration) && duration > 0) {
                 this.settings.time.duration = duration;
@@ -145,8 +145,8 @@ Clock.prototype.updateSettings = function (updates) {
         this.start();
     }
 
-    if (updates.display) {
-        if (updates.display.color) {
+    if ('display' in updates) {
+        if ('color' in updates.display) {
             var reColor = false;
 
             var color = this.isValidColor(updates.display.color.background);
@@ -171,15 +171,15 @@ Clock.prototype.updateSettings = function (updates) {
                 this.updateColors();
             }
         }
-        if (typeof updates.display.animate == 'boolean') {
+        if (typeof updates.display.animate === 'boolean') {
             // TODO
         }
-        if (typeof updates.display.summary == 'boolean') {
+        if (typeof updates.display.summary === 'boolean') {
             // TODO
         }
     }
 
-    if (updates.sound) {
+    if ('sound' in updates) {
         if (typeof updates.sound.minute == 'string') {
             // TODO
         }

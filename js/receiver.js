@@ -41,7 +41,7 @@ rcvr.castInit = function () {
         window.castReceiverManager.setApplicationState(event.data);
         // inform all senders on the CastMessageBus of the incoming message event
         // sender message listener will be invoked
-        window.messageBus.send(event.senderId, event.data);
+        window.messageBus.send(event.senderId, JSON.stringify(rcvr.clock.settings));
     };
 
     // initialize the CastReceiverManager with an application status message
@@ -52,7 +52,10 @@ rcvr.castInit = function () {
 rcvr.log = function(message) {
     console.log(message);
     var dw = document.getElementById("debugmessage");
-    dw.innerHTML += '\n' + JSON.stringify(message);
+    if( typeof message === 'object') {
+        message = JSON.stringify(message);
+    }
+    dw.innerHTML += '\n' + message;
     dw.scrollTop = dw.scrollHeight;
 };
 
