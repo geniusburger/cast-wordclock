@@ -89,6 +89,11 @@ function Clock(root) {
     this.D1 = root.querySelector('#text1');
     this.D7 = root.querySelector('#text7');
 
+    // Replace the underscores
+    ['B','Z','R','J','M','P','A','S','C','T','L','7'].forEach(function(replacement, i) {
+        root.querySelector('#text_' + (i+1)).innerHTML = replacement;
+    });
+
     this.all = Array.prototype.slice.call(root.querySelectorAll('span'));
 
     this.settings = JSON.parse(JSON.stringify(Clock.defaults));
