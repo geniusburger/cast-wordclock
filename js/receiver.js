@@ -20,10 +20,10 @@ rcvr.castInit = function () {
     };
 
     castReceiverManager.onSenderDisconnected = function (event) {
-        rcvr.log('Received Sender Disconnected event: ' + event.data);
-        if (window.castReceiverManager.getSenders().length == 0) {
-            window.close();
-        }
+        rcvr.log('Ignoring Received Sender Disconnected event: ' + event.data);
+//        if (window.castReceiverManager.getSenders().length == 0) {
+//            window.close();
+//        }
     };
 
     castReceiverManager.onSystemVolumeChanged = function (event) {
