@@ -101,7 +101,7 @@ function Clock(root) {
 Clock.defaults = {
     time: {
         now: new Date(),		    // Date, set the current time
-        duration: 200,		        // Number, [1,9007199254740992], set the duration of a minute
+        duration: 60000,		        // Number, [1,9007199254740992], set the duration of a minute
         run: true				    // Boolean, start/stop the clock
     },
     display: {
