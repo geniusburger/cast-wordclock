@@ -37,8 +37,8 @@ rcvr.castInit = function () {
     window.messageBus.onMessage = function (event) {
         rcvr.log('Message [' + event.senderId + ']: ' + event.data);
         // display the message from the sender
-        rcvr.clock.updateSettings(event.data);
-        window.castReceiverManager.setApplicationState(JSON.stringify(event.data));
+        rcvr.clock.updateSettings(JSON.parse(event.data));
+        window.castReceiverManager.setApplicationState(event.data);
         // inform all senders on the CastMessageBus of the incoming message event
         // sender message listener will be invoked
         window.messageBus.send(event.senderId, event.data);
