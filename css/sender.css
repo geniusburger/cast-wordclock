@@ -35,6 +35,7 @@ label {
     font-family: monospace;
     font-size: 200%;
     margin-right: 0;
+    padding: 2px 5px;
 }
 
 #debugSection {
