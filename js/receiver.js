@@ -57,7 +57,7 @@ rcvr.log = function(message) {
 
 rcvr.receiverInit = function () {
     rcvr.clock = new Clock(document.getElementById('clock'));
-    castInit();
+    rcvr.castInit();
 };
 
 rcvr.addEvent = function (el, evnt, func) {
@@ -68,4 +68,4 @@ rcvr.addEvent = function (el, evnt, func) {
     }
 };
 
-rcvr.addEvent(window, 'load', receiverInit);
+rcvr.addEvent(window, 'load', rcvr.receiverInit);
