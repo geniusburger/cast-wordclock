@@ -25,36 +25,31 @@ limitations under the License.
     <script type="text/javascript" src="//www.gstatic.com/cv/js/sender/v1/cast_sender.js"></script>
 </head>
 <body>
-<table id="colors">
-    <colgroup>
-        <col style="width: 33%"/>
-        <col style="width: 33%"/>
-        <col style="width: 33%"/>
-    </colgroup>
-    <thead>
+<table id="controls">
     <tr>
-        <th colspan="3">Color</th>
+        <td align="right"><label for="backgroundColor">Background</label></td>
+        <td align="center"><input id="backgroundColor" class="color border" size="6" disabled></td>
     </tr>
     <tr>
-        <th align="center"><label for="backgroundColor">Background</label></th>
-        <th align="center"><label for="activeColor">Active</label></th>
-        <th align="center"><label for="inactiveColor">Inactive</label></th>
+        <td align="right"><label for="activeColor">Active</label></td>
+        <td align="center"><input id="activeColor" class="color border" size="6" disabled></td>
     </tr>
-    </thead>
-    <tbody>
     <tr>
-        <td align="center"><input id="backgroundColor" class="color" size="6" disabled></td>
-        <td align="center"><input id="activeColor" class="color" size="6" disabled></td>
-        <td align="center"><input id="inactiveColor" class="color" size="6" disabled></td>
+        <td align="right"><label for="inactiveColor">Inactive</label></td>
+        <td align="center"><input id="inactiveColor" class="color border" size="6" disabled></td>
     </tr>
-    </tbody>
+    <tr>
+        <td colspan="2"><input type="button" id="updateColors" onclick="sender.updateColors()" value="Update Colors" disabled></td>
+    </tr>
+    <tr>
+        <td colspan="2"><input type="button" id="run" onclick="sender.updateRunOrStop()" value="Run" disabled></td>
+    </tr>
 </table>
 
-<button type="button" id="updateColors" onclick="sender.updateColors()" disabled>Update Colors</button>
-<button type="button" id="run" onclick="sender.updateRunOrStop()" disabled>Run</button>
-
-<div style="margin:10px;display:none;">
-    <input type="text" id="duration" disabled><button type="button" id="updateDuration" onclick="sender.updateDuration()" disabled>Update Duration</button><br>
+<div id="debugSection" style="margin:10px;display:none;">
+    <input type="text" id="duration" disabled>
+    <button type="button" id="updateDuration" onclick="sender.updateDuration()" disabled>Update Duration</button>
+    <br>
     <label for="debugmessage" style="display:none;">Debug</label>
     <textarea rows="20" cols="70" id="debugmessage"></textarea>
 </div>

@@ -1,24 +1,50 @@
-html, body, #wrapper {
+html, body {
     height: 100%;
     width: 100%;
     margin: 0;
     padding: 0;
     border: 0;
+    font-family: sans-serif;
+    background-color: black;
 }
 
-#colors input {
+label {
+    color: white;
+}
+
+#controls {
+    margin: 20px auto;
+}
+
+.color {
     font-family: monospace;
+    font-size: 200%;
 }
 
-#wrapper td {
-    vertical-align: middle;
-    text-align: center;
+input[type=button] {
+    background-color: #888888;
+    width: 100%;
+    font-size: 125%;
+    border: 2px solid #cccccc;
+    border-radius: 5px;
+    cursor: pointer;
 }
 
-#wrapper input {
-    font-family: "Arial", Arial, sans-serif;
-    font-size: 40px;
-    font-weight: bold;
+input[type=button]:active {
+    background-color: #666666;
+}
+
+input[type=button]:hover {
+    background-color: #BBBBBB;
+}
+
+input[type=button]:disabled {
+    background-color: #555555;
+    cursor: default;
+}
+
+#debugSection {
+    font-size: 100%;
 }
 
 .border {

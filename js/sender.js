@@ -88,7 +88,7 @@ sender.loadSettings = function(settings) {
     document.getElementById('activeColor').value = settings.display.color.active;
     document.getElementById('inactiveColor').value = settings.display.color.inactive;
     document.getElementById('duration').value = settings.time.duration;
-    document.getElementById('run').innerHTML = settings.time.run ? 'Stop' : 'Run';
+    document.getElementById('run').value = settings.time.run ? 'Stop' : 'Run';
 };
 
 sender.disableControls = function(disable, settings) {
