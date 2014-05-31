@@ -50,12 +50,11 @@ limitations under the License.
     </tbody>
 </table>
 
-<button type="button" id="updateColors" onclick="sender.updateColors()" disabled>Update Colors</button><br>
-<input type="text" id="duration" disabled><button type="button" id="updateDuration" onclick="sender.updateDuration()" disabled>Update Duration</button><br>
-<button type="button" id="run" onclick="sender.updateRunOrStop(true)" disabled>Run</button>
-<button type="button" id="stop" onclick="sender.updateRunOrStop(false)" disabled>Stop</button><br>
+<button type="button" id="updateColors" onclick="sender.updateColors()" disabled>Update Colors</button>
+<button type="button" id="run" onclick="sender.updateRunOrStop()" disabled>Run</button>
 
-<div style="margin:10px;">
+<div style="margin:10px;display:none;">
+    <input type="text" id="duration" disabled><button type="button" id="updateDuration" onclick="sender.updateDuration()" disabled>Update Duration</button><br>
     <label for="debugmessage" style="display:none;">Debug</label>
     <textarea rows="20" cols="70" id="debugmessage"></textarea>
 </div>

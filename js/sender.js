@@ -88,6 +88,7 @@ sender.loadSettings = function(settings) {
     document.getElementById('activeColor').value = settings.display.color.active;
     document.getElementById('inactiveColor').value = settings.display.color.inactive;
     document.getElementById('duration').value = settings.time.duration;
+    document.getElementById('run').innerHTML = settings.time.run ? 'Stop' : 'Run';
 };
 
 sender.disableControls = function(disable, settings) {
@@ -97,8 +98,7 @@ sender.disableControls = function(disable, settings) {
     document.getElementById('updateColors').disabled = disable;
     document.getElementById('duration').disabled = disable;
     document.getElementById('updateDuration').disabled = disable;
-    document.getElementById('run').disabled = disable || settings.time.run;
-    document.getElementById('stop').disabled = disable || !settings.time.run;
+    document.getElementById('run').disabled = disable;
 };
 
 /**
@@ -152,10 +152,10 @@ sender.updateColors = function() {
     sender.sendMessage(settings);
 };
 
-sender.updateRunOrStop = function(runClock) {
+sender.updateRunOrStop = function() {
     var settings = {
         time : {
-            run: runClock
+            run: !sender.lastCookie.time.run
         }
     };
 
