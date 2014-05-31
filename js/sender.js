@@ -26,7 +26,7 @@ sender.onInitSuccess = function () {
  * initialization error callback
  */
 sender.onError = function (message) {
-    sender.setStatus('Error', true);
+    sender.setStatus('Error', 'error');
     sender.log("onError: " + JSON.stringify(message));
 };
 
@@ -48,7 +48,7 @@ sender.onStopAppSuccess = function () {
  * session listener during initialization
  */
 sender.sessionListener = function (e) {
-    sender.setStatus('Connected');
+    sender.setStatus('Connected', 'success');
     sender.log('New session ID:' + e.sessionId);
     sender.session = e;
     sender.session.addUpdateListener(sender.sessionUpdateListener);
@@ -186,15 +186,18 @@ sender.log = function (message) {
     dw.scrollTop = dw.scrollHeight;
 };
 
-sender.setStatus = function (status, error) {
+sender.setStatus = function (status, type) {
     var label = document.getElementById('status');
     label.innerHTML = status;
-    if( error) {
+    label.parentNode.classList.remove('error');
+    label.parentNode.classList.remove('success');
+    if( type === 'error') {
         label.parentNode.classList.add('error');
-    } else {
-        label.parentNode.classList.remove('error');
+    } else if (type === 'success') {
+        label.parentNode.classList.add('success');
     }
 };
+
 
 sender.init = function () {
     sender.log('init');
