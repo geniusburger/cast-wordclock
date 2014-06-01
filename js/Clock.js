@@ -136,7 +136,7 @@ Clock.prototype.updateSettings = function (updates) {
         this.stop();
         if (updates.time.now instanceof Date) {
             this.settings.time.now = updates.time.now;
-            this.setTime();
+            this.updateClock();
         }
         if (updates.time.hasOwnProperty('duration')) {
             var duration = parseInt(updates.time.duration);
@@ -253,20 +253,9 @@ Clock.prototype.tick = function () {
 
 Clock.prototype.updateClock = function (date) {
     console.log("updateClock", date);
-    var minute = date.getMinutes();
-    var hour = date.getHours();
-    var am = true;
-    if (hour >= 12) {
-        hour -= 12;
-        am = false;
-    }
-    if (hour === 0) {
-        hour = 12;
-    }
-
     this.allOff();
     this.on(this.ITS);
-    this.setTime(hour, minute, am);
+    this.setTime(date.getHours(), date.getMinutes());
     this.setDayOfWeek(date.getDay());
     this.setDayOfMonth(date.getDate());
     this.setMonth(date.getMonth());
@@ -388,7 +377,13 @@ Clock.prototype.setDayOfWeek = function(day) {
     }
 };
 
-Clock.prototype.setTime = function (hour, minute, am) {
+Clock.prototype.setTime = function (hour, minute) {
+    var am = true;
+    if (hour >= 12) {
+        hour -= 12;
+        am = false;
+    }
+
     switch (hour) {
         case 0:
             this.on(this.TWELVEHOUR);
