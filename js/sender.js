@@ -3,6 +3,7 @@ sender.applicationID = '8D74C526';
 sender.namespace = 'urn:x-cast:me.geniusburger.cast.wordclock';
 sender.session = null;
 sender.lastCookie = null;
+sender.updating = false;
 
 /**
  * initialization
@@ -81,6 +82,14 @@ sender.receiverMessage = function (namespace, message) {
         if (util.isValidObject(test, Clock.defaults, sender)) {
             util.setCookie('settings', message);
             sender.loadSettings(test);
+            sender.setStatus('Updated');
+            sender.updating = false;
+        } else {
+            sender.log('Invalid message object');
+            if( sender.updating) {
+                sender.updating = fasle;
+                sender.setStatus('Update Failed', 'error');
+            }
         }
     }
 };
@@ -134,11 +143,15 @@ sender.stopApp = function () {
  */
 sender.sendMessage = function (message) {
     if (sender.session != null) {
+        sender.setStatus('Updating...');
+        sender.updating = true;
         sender.session.sendMessage(sender.namespace, message, sender.onSuccess.bind(this, "Message sent: " + message), sender.onError);
-    }
-    else {
+    } else {
         chrome.cast.requestSession(function (e) {
+            sender.setStatus('Connect Device');
             sender.session = e;
+            sender.setStatus('Updating...');
+            sender.updating = true;
             sender.session.sendMessage(sender.namespace, message, sender.onSuccess.bind(this, "Message sent: " + message), sender.onError);
         }, sender.onError);
     }
