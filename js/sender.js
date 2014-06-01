@@ -111,10 +111,12 @@ sender.disableControls = function (disable, settings) {
 sender.receiverListener = function (e) {
     if (e === chrome.cast.ReceiverAvailability.AVAILABLE) {
         sender.log("receiver found");
+        sender.setStatus('Connect Device');
         chrome.cast.requestSession(sender.sessionListener, sender.error);
     }
     else {
         sender.log("receiver list empty, " + e);
+        sender.setStatus('No Devices Found', 'error');
     }
 };
 
