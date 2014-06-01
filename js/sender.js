@@ -54,7 +54,7 @@ sender.sessionListener = function (e) {
     sender.session = e;
     sender.session.addUpdateListener(sender.sessionUpdateListener);
     sender.session.addMessageListener(sender.namespace, sender.receiverMessage);
-    sender.sendMessage(sender.lastCookie);
+    sender.sendMessage(sender.lastCookie, false);
 };
 
 /**
@@ -82,8 +82,10 @@ sender.receiverMessage = function (namespace, message) {
         if (util.isValidObject(test, Clock.defaults, sender)) {
             util.setCookie('settings', message);
             sender.loadSettings(test);
-            sender.setStatus('Updated');
-            sender.updating = false;
+            if( sender.updating) {
+                sender.setStatus('Updated', 'success');
+                sender.updating = false;
+            }
         } else {
             sender.log('Invalid message object');
             if( sender.updating) {
@@ -141,17 +143,24 @@ sender.stopApp = function () {
  * receiver CastMessageBus message handler will be invoked
  * @param {string} message A message string
  */
-sender.sendMessage = function (message) {
+sender.sendMessage = function (message, updating) {
+    if( typeof updating !== 'boolean') {
+        updating = true;
+    }
     if (sender.session != null) {
-        sender.setStatus('Updating...');
-        sender.updating = true;
+        if( updating) {
+            sender.setStatus('Updating...');
+            sender.updating = true;
+        }
         sender.session.sendMessage(sender.namespace, message, sender.onSuccess.bind(this, "Message sent: " + message), sender.onError);
     } else {
         chrome.cast.requestSession(function (e) {
             sender.setStatus('Connect Device');
             sender.session = e;
-            sender.setStatus('Updating...');
-            sender.updating = true;
+            if( updating) {
+                sender.setStatus('Updating...');
+                sender.updating = true;
+            }
             sender.session.sendMessage(sender.namespace, message, sender.onSuccess.bind(this, "Message sent: " + message), sender.onError);
         }, sender.onError);
     }
