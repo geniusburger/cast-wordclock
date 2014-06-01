@@ -42,6 +42,7 @@ rcvr.castInit = function () {
         // inform all senders on the CastMessageBus of the incoming message event
         // sender message listener will be invoked
         window.messageBus.send(event.senderId, JSON.stringify(rcvr.clock.settings));
+        //window.messageBus.broadcast(JSON.stringify(rcvr.clock.settings));
     };
 
     // initialize the CastReceiverManager with an application status message
