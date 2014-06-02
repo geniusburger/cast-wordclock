@@ -92,6 +92,7 @@ sender.receiverMessage = function (namespace, stringMessage) {
             if (sender.blocked) {
                 if (sender.lastMessage.otherType === message.type) {
                     sender.blocked = false; // Unblock
+                    sender.enableControls(true);
                     send = true;
                 } else {
                     sender.log('Ignoring message type ' + message.type + ', waiting for unblocking message type ' + sender.lastMessage.otherType);
@@ -213,6 +214,8 @@ sender.sendMessage = function (message) {
         sender.setStatus(message.sendingStatus);
         sender.lastMessage = message;
         sender.blocked = message.isBlocking;
+        sender.enableControls(false);
+        // TODO check if serializeMessage is being used, might want to use JSON.stringify instead, since numbers are getting converted to strings
         sender.session.sendMessage(Clock.NAMESPACE, {type: message.type, data: message.data}, sender.onSuccess.bind(this, "Message sent: " + message), sender.onError);
     }
 };
