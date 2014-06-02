@@ -61,11 +61,12 @@ sender.onStopAppSuccess = function () {
 
 /**
  * session listener during initialization
+ * @param {chrome.cast.Session} session
  */
-sender.sessionListener = function (e) {
+sender.sessionListener = function (session) {
     sender.setStatus('Connected', 'success');
-    sender.log('New session ID:' + e.sessionId);
-    sender.session = e;
+    sender.log('New session ID:' + session.sessionId);
+    sender.session = session;
     sender.session.addUpdateListener(sender.sessionUpdateListener);
     sender.session.addMessageListener(Clock.NAMESPACE, sender.receiverMessage);
     sender.sendMessage(new InitializeMessage(sender.lastCookie));
@@ -124,6 +125,11 @@ sender.receiverMessage = function (namespace, stringMessage) {
     }
 };
 
+/**
+ * Process a received message.
+ * @param {Message} message
+ * @returns {boolean} true on success, false on error
+ */
 sender.processMessage = function (message) {
     switch (message.type) {
         case Message.type.INITIALIZED:
@@ -174,7 +180,7 @@ sender.loadSettings = function (settings) {
     document.getElementById('run').innerHTML = settings.time.run ? 'Stop' : 'Run';
 };
 
-sender.enableControls = function (enable, settings) {
+sender.enableControls = function (enable) {
     document.getElementById('backgroundColor').disabled = !enable;
     document.getElementById('activeColor').disabled = !enable;
     document.getElementById('inactiveColor').disabled = !enable;
@@ -225,15 +231,12 @@ sender.sendMessage = function (message) {
             sender.enableControls(false);
             sender.blocked = true;
             sender.timeoutId = setTimeout(sender.timeout, sender.TIMEOUT_DURATION);
-            // TODO add timeout in case no response is received
         }
-        // TODO check if serializeMessage is being used, might want to use JSON.stringify instead, since numbers are getting converted to strings
-        sender.session.sendMessage(Clock.NAMESPACE, {type: message.type, data: message.data}, sender.onSuccess.bind(this, "Message sent: " + message), sender.onError);
+        sender.session.sendMessage(Clock.NAMESPACE, JSON.stringify({type: message.type, data: message.data}), sender.onSuccess.bind(this, "Message sent: " + message), sender.onError);
     }
 };
 
 sender.timeout = function() {
-    //sender.setStatus(sender.lastMessage.errorStatus, 'error');
     sender.setStatus('Timeout', 'error');
     sender.enableControls(true);
 };

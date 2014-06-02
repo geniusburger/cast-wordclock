@@ -8,7 +8,7 @@ var util = {};
 /**
  * Retrieve a cookie from the browser.
  * @param  {string} name The name of the cookie to retrieve.
- * @return {string} Value of the cookie or null if not found.
+ * @return {string|object} Value of the cookie or null if not found.
  */ 
 util.getCookie = function(name) {
     var name = name + "=";
@@ -31,7 +31,7 @@ util.getCookie = function(name) {
 /**
  * Set a cookie in the browser.
  * @param {string} name The name of the cookie to set.
- * @param {string} value The value fo the cookie to set.
+ * @param {string|object} value The value fo the cookie to set.
  */
 util.setCookie = function(name, value) {
     if( typeof value !== 'string') {
