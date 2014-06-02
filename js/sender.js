@@ -3,13 +3,22 @@ sender.applicationID = '8D74C526';
 sender.namespace = 'urn:x-cast:me.geniusburger.cast.wordclock';
 sender.session = null;
 sender.lastCookie = null;
-sender.lastMessageType = null;
+/**
+ * Holds the most recently sent message.
+ * @type {Message}
+ */
+sender.lastMessage = null;
+/**
+ * true if a blocking message was sent and a response hasn't been received yet.
+ * @type {boolean}
+ */
+sender.blocked = false;
 
 /**
  * initialization
  */
 sender.initializeCastApi = function () {
-    sender.setStatus('Initializing');
+    sender.setStatus('Initializing...');
     var sessionRequest = new chrome.cast.SessionRequest(sender.applicationID);
     var apiConfig = new chrome.cast.ApiConfig(sessionRequest, sender.sessionListener, sender.receiverListener);
     chrome.cast.initialize(apiConfig, sender.onInitSuccess, sender.onError);
@@ -63,10 +72,10 @@ sender.sessionListener = function (e) {
 sender.sessionUpdateListener = function (isAlive) {
     var message = (isAlive ? 'Session Updated' : 'Session Removed') + ': ' + sender.session.sessionId;
     sender.log(message);
-    if( !isAlive) {
+    if (!isAlive) {
         sender.setStatus('Disconnected');
         sender.session = null;
-        sender.disableControls(true);
+        sender.enableControls(false);
     }
 };
 
@@ -79,55 +88,27 @@ sender.receiverMessage = function (namespace, stringMessage) {
     sender.log("receiverMessage: " + namespace + ", " + stringMessage);
     if (namespace === sender.namespace) {
         var message = JSON.parse(stringMessage);
-        if( message.hasOwnProperty('type')) {
-            switch (message.type) {
-                case Message.type.INITIALIZED:
-                    if( sender.lastMessageType === Message.type.INITIALIZE) {
-                        if( message.success) {
-                            if (util.isValidObject(message.settings, Clock.defaults, sender)) {
-                                // TODO handle checking if initialized correctly
-                                util.setCookie('settings', JSON.stringify(message.settings));
-                                sender.loadSettings(message.settings);
-                                sender.setStatus('Started');
-                            } else {
-                                sender.log('Invalid settings object');
-                                sender.setStatus('Start Failed', 'error');
-                            }
-                        }
-                    } else {
-                        sender.log('Unexpected last message type ' + sender.lastMessageType);
-                        sender.setStatus('Message Error', 'error');
-                    }
-                    break;
-                case Message.type.SETTINGS:
-                    // TODO handle current settings
-                    if (util.isValidObject(message.settings, Clock.defaults, sender)) {
-                        util.setCookie('settings', JSON.stringify(message.settings));
-                        sender.loadSettings(message.settings);
-                        sender.setStatus('Updated');
-                    } else {
-                        sender.log('Invalid settings object');
-                        sender.setStatus('Comm Failed', 'error');
-                    }
-                    break;
-                case Message.type.UPDATED:
-                    if( sender.lastMessageType === Message.type.UPDATE) {
-                        if( message.success) {
-                            if (util.isValidObject(message.settings, Clock.defaults, sender)) {
-                                // TODO handle checking if updated correctly
-                                util.setCookie('settings', JSON.stringify(message.settings));
-                                sender.loadSettings(message.settings);
-                                sender.setStatus('Updated');
-                            } else {
-                                sender.log('Invalid settings object');
-                                sender.setStatus('Update Failed', 'error');
-                            }
-                        }
-                    } else {
-                        sender.log('Unexpected last message type ' + sender.lastMessageType);
-                        sender.setStatus('Message Error', 'error');
-                    }
-                    break;
+        if (message.hasOwnProperty('type')) {
+            var send = false;
+
+            if (sender.blocked) {
+                if (sender.lastMessage.otherType === message.type) {
+                    sender.blocked = false; // Unblock
+                    send = true;
+                } else {
+                    sender.log('Ignoring message type ' + message.type + ', waiting for unblocking message type ' + sender.lastMessage.otherType);
+                    sender.setStatus('Blocked', 'error');
+                }
+            } else {
+                send = true;
+            }
+
+            if (send) {
+                if (sender.processMessage(message)) {
+                    sender.setStatus(sender.lastMessage.successStatus, sender.lastMessage.isBlocking ? 'success' : null);
+                } else {
+                    sender.setStatus(sender.lastMessage.errorStatus, 'error');
+                }
             }
         } else {
             sender.log('Invalid message');
@@ -136,9 +117,49 @@ sender.receiverMessage = function (namespace, stringMessage) {
     }
 };
 
+sender.processMessage = function (message) {
+    switch (message.type) {
+        case Message.type.INITIALIZED:
+            if (message.data.success) {
+                if (util.isValidObject(message.data.data, Clock.defaults, sender)) {
+                    // TODO handle checking if initialized correctly
+                    util.setCookie('settings', message.data.data);
+                    sender.loadSettings(message.data.data);
+                    return true;
+                } else {
+                    sender.log('Invalid settings object');
+                }
+            }
+            break;
+        case Message.type.UPDATED:
+            if (message.data.success) {
+                if (util.isValidObject(message.data.data, Clock.defaults, sender)) {
+                    // TODO handle checking if updated correctly
+                    util.setCookie('settings', message.data.data);
+                    sender.loadSettings(message.data.data);
+                    return true;
+                } else {
+                    sender.log('Invalid settings object');
+                }
+            }
+            break;
+        case Message.type.SETTINGS:
+            // TODO handle current settings
+            if (util.isValidObject(message.data, Clock.defaults, sender)) {
+                util.setCookie('settings', message.data);
+                sender.loadSettings(message.data);
+                return true;
+            } else {
+                sender.log('Invalid settings object');
+            }
+            break;
+    }
+    return false;
+};
+
 sender.loadSettings = function (settings) {
     sender.lastCookie = settings;
-    sender.disableControls(false, settings);
+    sender.enableControls(true, settings);
     document.getElementById('backgroundColor').value = settings.display.color.background;
     document.getElementById('activeColor').value = settings.display.color.active;
     document.getElementById('inactiveColor').value = settings.display.color.inactive;
@@ -146,14 +167,14 @@ sender.loadSettings = function (settings) {
     document.getElementById('run').innerHTML = settings.time.run ? 'Stop' : 'Run';
 };
 
-sender.disableControls = function (disable, settings) {
-    document.getElementById('backgroundColor').disabled = disable;
-    document.getElementById('activeColor').disabled = disable;
-    document.getElementById('inactiveColor').disabled = disable;
-    document.getElementById('updateColors').disabled = disable;
-    document.getElementById('duration').disabled = disable;
-    document.getElementById('updateDuration').disabled = disable;
-    document.getElementById('run').disabled = disable;
+sender.enableControls = function (enable, settings) {
+    document.getElementById('backgroundColor').disabled = !enable;
+    document.getElementById('activeColor').disabled = !enable;
+    document.getElementById('inactiveColor').disabled = !enable;
+    document.getElementById('updateColors').disabled = !enable;
+    document.getElementById('duration').disabled = !enable;
+    document.getElementById('updateDuration').disabled = !enable;
+    document.getElementById('run').disabled = !enable;
 };
 
 /**
@@ -181,25 +202,20 @@ sender.stopApp = function () {
 /**
  * send a message to the receiver using the custom namespace
  * receiver CastMessageBus message handler will be invoked
- * @param {string} message A message string
+ * @param {Message} message A message string
  */
 sender.sendMessage = function (message) {
-    if (sender.session != null) {
-        if( message.type === Message.type.UPDATE) {
-            sender.setStatus('Updating...');
-        }
-        sender.lastMessageType = message.type;
-        sender.session.sendMessage(sender.namespace, message, sender.onSuccess.bind(this, "Message sent: " + message), sender.onError);
+    if (sender.session == null) {
+        sender.log("tried to send message without a session");
+        sender.setStatus('Missing Session', 'error');
+    } else if (sender.blocked) {
+        sender.log('tried to send message while blocked');
+        sender.setStatus('Blocked');
     } else {
-        chrome.cast.requestSession(function (e) {
-            sender.setStatus('Connect Device');
-            sender.session = e;
-            if( message.type === Message.type.UPDATE) {
-                sender.setStatus('Updating...');
-            }
-            sender.lastMessageType = message.type;
-            sender.session.sendMessage(sender.namespace, message, sender.onSuccess.bind(this, "Message sent: " + message), sender.onError);
-        }, sender.onError);
+        sender.setStatus(message.sendingStatus);
+        sender.lastMessage = message;
+        sender.blocked = message.isBlocking;
+        sender.session.sendMessage(sender.namespace, {type: message.type, data: message.data}, sender.onSuccess.bind(this, "Message sent: " + message), sender.onError);
     }
 };
 
@@ -248,14 +264,16 @@ sender.log = function (message) {
 };
 
 sender.setStatus = function (status, type) {
-    var label = document.getElementById('status');
-    label.innerHTML = status;
-    label.parentNode.classList.remove('error');
-    label.parentNode.classList.remove('success');
-    if( type === 'error') {
-        label.parentNode.classList.add('error');
-    } else if (type === 'success') {
-        label.parentNode.classList.add('success');
+    if (typeof status === 'string') {
+        var label = document.getElementById('status');
+        label.innerHTML = status;
+        label.parentNode.classList.remove('error');
+        label.parentNode.classList.remove('success');
+        if (type === 'error') {
+            label.parentNode.classList.add('error');
+        } else if (type === 'success') {
+            label.parentNode.classList.add('success');
+        }
     }
 };
 
@@ -266,11 +284,9 @@ sender.init = function () {
     var cookie = util.getCookie('settings');
     if (cookie == null) {
         cookie = Clock.defaults;
-    } else {
-        cookie = JSON.parse(cookie);
     }
     sender.loadSettings(cookie);
-    sender.disableControls(true);
+    sender.enableControls(false);
     jscolor.init();
 };
 

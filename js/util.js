@@ -15,7 +15,15 @@ util.getCookie = function(name) {
     var ca = document.cookie.split(';');
     for (var i = 0; i < ca.length; i++) {
         var c = ca[i].trim();
-        if (c.indexOf(name) == 0) return c.substring(name.length, c.length);
+        if (c.indexOf(name) == 0) {
+            var value = c.substring(name.length, c.length);
+            try {
+                value = JSON.parse(value);
+            } catch (e) {
+                // not a JSON object, ignore
+            }
+            return value;
+        }
     }
     return null;
 };
@@ -26,6 +34,9 @@ util.getCookie = function(name) {
  * @param {string} value The value fo the cookie to set.
  */
 util.setCookie = function(name, value) {
+    if( typeof value !== 'string') {
+        value = JSON.stringify(value);
+    }
     document.cookie = name + "=" + value;
 };
 
