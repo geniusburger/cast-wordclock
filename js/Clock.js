@@ -114,14 +114,7 @@ Clock.defaults = {
             background: "000000",	// String, 3 or 6 digit hex RGB color with optional '#'
             active: "FFFFFF",		// String, 3 or 6 digit hex RGB color with optional '#'
             inactive: "333333"		// String, 3 or 6 digit hex RGB color with optional '#'
-        },
-        animate: false,			    // Boolean, enable/disable animation when changing time
-        summary: false			    // Boolean, show/hide summary of current time
-    },
-    sound: {
-        minute: null,			    // String, url to use for the minute sound, null to disable
-        hour: null,				    // String, url to use for the hour sound, null to disable
-        day: null				    // String, url to use for the day sound, null to disable
+        }
     }
 };
 
@@ -175,24 +168,6 @@ Clock.prototype.updateSettings = function (updates) {
             if (reColor) {
                 this.updateColors();
             }
-        }
-        if (typeof updates.display.animate === 'boolean') {
-            // TODO
-        }
-        if (typeof updates.display.summary === 'boolean') {
-            // TODO
-        }
-    }
-
-    if (updates.hasOwnProperty('sound')) {
-        if (typeof updates.sound.minute == 'string') {
-            // TODO
-        }
-        if (typeof updates.sound.hour == 'string') {
-            // TODO
-        }
-        if (typeof updates.sound.day == 'string') {
-            // TODO
         }
     }
 };

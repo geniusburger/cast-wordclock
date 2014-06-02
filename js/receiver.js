@@ -3,6 +3,7 @@ rcvr = {};
 rcvr.clock = null;
 
 rcvr.namespace = 'urn:x-cast:me.geniusburger.cast.wordclock';
+rcvr.intialized = false;
 
 rcvr.castInit = function () {
     cast.receiver.logger.setLevelValue(0);
@@ -34,20 +35,52 @@ rcvr.castInit = function () {
     window.messageBus = window.castReceiverManager.getCastMessageBus(rcvr.namespace);
 
     // handler for the CastMessageBus message event
-    window.messageBus.onMessage = function (event) {
-        rcvr.log('Message [' + event.senderId + ']: ' + event.data);
-        // display the message from the sender
-        rcvr.clock.updateSettings(JSON.parse(event.data));
-        window.castReceiverManager.setApplicationState(event.data);
-        // inform all senders on the CastMessageBus of the incoming message event
-        // sender message listener will be invoked
-        window.messageBus.send(event.senderId, JSON.stringify(rcvr.clock.settings));
-        //window.messageBus.broadcast(JSON.stringify(rcvr.clock.settings));
-    };
+    window.messageBus.onMessage = rcvr.onMessage;
 
     // initialize the CastReceiverManager with an application status message
     window.castReceiverManager.start({statusText: "Application is starting"});
     rcvr.log('Receiver Manager started');
+};
+
+rcvr.onMessage = function (event) {
+    rcvr.log('Message [' + event.senderId + ']: ' + event.data);
+
+    var message = JSON.parse(event.data);
+    if( message.hasOwnProperty('type')) {
+        switch(message.type) {
+            case Message.type.INITIALIZE:
+                // Only init if not initialized, otherwise don't respond
+                if( !rcvr.intialized) {
+                    rcvr.clock.updateSettings(message.settings);
+                    window.castReceiverManager.setApplicationState('Initialized');
+                    rcvr.sendMessage(new InitializedMessage(true, rcvr.clock.settings));
+                } else {
+                    window.castReceiverManager.setApplicationState('Ignored init message');
+                }
+                break;
+            case Message.type.UPDATE:
+                rcvr.clock.updateSettings(message.settings);
+                window.castReceiverManager.setApplicationState('Updated');
+                rcvr.sendMessage(new UpdatedMessage(true, rcvr.clock.settings));
+                rcvr.broadcast(new SettingsMessage(rcvr.clock.settings));
+                break;
+            default:
+                window.castReceiverManager.setApplicationState('Received message with odd type');
+                rcvr.sendMessage(new ErrorMessage('Unexpected message type'));
+                break;
+        }
+    } else {
+        window.castReceiverManager.setApplicationState('Received message without type');
+        rcvr.sendMessage(new ErrorMessage('Missing message type'));
+    }
+};
+
+rcvr.sendMessage = function(event, message) {
+    window.messageBus.send(event.senderId, JSON.stringify(message));
+};
+
+rcvr.broadcast = function(message) {
+    window.messageBus.broadcast(JSON.stringify(message));
 };
 
 rcvr.log = function(message) {

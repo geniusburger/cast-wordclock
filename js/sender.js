@@ -3,7 +3,7 @@ sender.applicationID = '8D74C526';
 sender.namespace = 'urn:x-cast:me.geniusburger.cast.wordclock';
 sender.session = null;
 sender.lastCookie = null;
-sender.updating = false;
+sender.lastMessageType = null;
 
 /**
  * initialization
@@ -54,7 +54,7 @@ sender.sessionListener = function (e) {
     sender.session = e;
     sender.session.addUpdateListener(sender.sessionUpdateListener);
     sender.session.addMessageListener(sender.namespace, sender.receiverMessage);
-    sender.sendMessage(sender.lastCookie, false);
+    sender.sendMessage(new InitializeMessage(sender.lastCookie));
 };
 
 /**
@@ -73,25 +73,65 @@ sender.sessionUpdateListener = function (isAlive) {
 /**
  * utility function to log messages from the receiver
  * @param {string} namespace The namespace of the message
- * @param {string} message A message string
+ * @param {string} stringMessage A message string
  */
-sender.receiverMessage = function (namespace, message) {
-    sender.log("receiverMessage: " + namespace + ", " + message);
+sender.receiverMessage = function (namespace, stringMessage) {
+    sender.log("receiverMessage: " + namespace + ", " + stringMessage);
     if (namespace === sender.namespace) {
-        var test = JSON.parse(message);
-        if (util.isValidObject(test, Clock.defaults, sender)) {
-            util.setCookie('settings', message);
-            sender.loadSettings(test);
-            if( sender.updating) {
-                sender.setStatus('Updated', 'success');
-                sender.updating = false;
+        var message = JSON.parse(stringMessage);
+        if( message.hasOwnProperty('type')) {
+            switch (message.type) {
+                case Message.type.INITIALIZED:
+                    if( sender.lastMessageType === Message.type.INITIALIZE) {
+                        if( message.success) {
+                            if (util.isValidObject(message.settings, Clock.defaults, sender)) {
+                                // TODO handle checking if initialized correctly
+                                util.setCookie('settings', JSON.stringify(message.settings));
+                                sender.loadSettings(message.settings);
+                                sender.setStatus('Started');
+                            } else {
+                                sender.log('Invalid settings object');
+                                sender.setStatus('Start Failed', 'error');
+                            }
+                        }
+                    } else {
+                        sender.log('Unexpected last message type ' + sender.lastMessageType);
+                        sender.setStatus('Message Error', 'error');
+                    }
+                    break;
+                case Message.type.SETTINGS:
+                    // TODO handle current settings
+                    if (util.isValidObject(message.settings, Clock.defaults, sender)) {
+                        util.setCookie('settings', JSON.stringify(message.settings));
+                        sender.loadSettings(message.settings);
+                        sender.setStatus('Updated');
+                    } else {
+                        sender.log('Invalid settings object');
+                        sender.setStatus('Comm Failed', 'error');
+                    }
+                    break;
+                case Message.type.UPDATED:
+                    if( sender.lastMessageType === Message.type.UPDATE) {
+                        if( message.success) {
+                            if (util.isValidObject(message.settings, Clock.defaults, sender)) {
+                                // TODO handle checking if updated correctly
+                                util.setCookie('settings', JSON.stringify(message.settings));
+                                sender.loadSettings(message.settings);
+                                sender.setStatus('Updated');
+                            } else {
+                                sender.log('Invalid settings object');
+                                sender.setStatus('Update Failed', 'error');
+                            }
+                        }
+                    } else {
+                        sender.log('Unexpected last message type ' + sender.lastMessageType);
+                        sender.setStatus('Message Error', 'error');
+                    }
+                    break;
             }
         } else {
-            sender.log('Invalid message object');
-            if( sender.updating) {
-                sender.updating = fasle;
-                sender.setStatus('Update Failed', 'error');
-            }
+            sender.log('Invalid message');
+            sender.setStatus('Message Error', 'error');
         }
     }
 };
@@ -143,24 +183,21 @@ sender.stopApp = function () {
  * receiver CastMessageBus message handler will be invoked
  * @param {string} message A message string
  */
-sender.sendMessage = function (message, updating) {
-    if( typeof updating !== 'boolean') {
-        updating = true;
-    }
+sender.sendMessage = function (message) {
     if (sender.session != null) {
-        if( updating) {
+        if( message.type === Message.type.UPDATE) {
             sender.setStatus('Updating...');
-            sender.updating = true;
         }
+        sender.lastMessageType = message.type;
         sender.session.sendMessage(sender.namespace, message, sender.onSuccess.bind(this, "Message sent: " + message), sender.onError);
     } else {
         chrome.cast.requestSession(function (e) {
             sender.setStatus('Connect Device');
             sender.session = e;
-            if( updating) {
+            if( message.type === Message.type.UPDATE) {
                 sender.setStatus('Updating...');
-                sender.updating = true;
             }
+            sender.lastMessageType = message.type;
             sender.session.sendMessage(sender.namespace, message, sender.onSuccess.bind(this, "Message sent: " + message), sender.onError);
         }, sender.onError);
     }
@@ -177,7 +214,7 @@ sender.updateColors = function () {
         }
     };
 
-    sender.sendMessage(settings);
+    sender.sendMessage(new UpdateMessage(settings));
 };
 
 sender.updateRunOrStop = function () {
@@ -187,7 +224,7 @@ sender.updateRunOrStop = function () {
         }
     };
 
-    sender.sendMessage(settings);
+    sender.sendMessage(new UpdateMessage(settings));
 };
 
 sender.updateDuration = function () {
@@ -197,7 +234,7 @@ sender.updateDuration = function () {
         }
     };
 
-    sender.sendMessage(settings);
+    sender.sendMessage(new UpdateMessage(settings));
 };
 
 sender.log = function (message) {
