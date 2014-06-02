@@ -1,4 +1,5 @@
 sender = {};
+sender.TIMEOUT_DURATION = 5000;
 sender.session = null;
 sender.lastCookie = null;
 /**
@@ -11,6 +12,12 @@ sender.lastMessage = null;
  * @type {boolean}
  */
 sender.blocked = false;
+
+/**
+ * The ID of the last timeout that was set
+ * @type {number|null}
+ */
+sender.timeoutId = null;
 
 /**
  * initialization
@@ -91,6 +98,7 @@ sender.receiverMessage = function (namespace, stringMessage) {
 
             if (sender.blocked) {
                 if (sender.lastMessage.otherType === message.type) {
+                    clearTimeout(sender.timeoutId);
                     sender.blocked = false; // Unblock
                     sender.enableControls(true);
                     send = true;
@@ -213,11 +221,21 @@ sender.sendMessage = function (message) {
     } else {
         sender.setStatus(message.sendingStatus);
         sender.lastMessage = message;
-        sender.blocked = message.isBlocking;
-        sender.enableControls(false);
+        if( message.isBlocking) {
+            sender.enableControls(false);
+            sender.blocked = true;
+            sender.timeoutId = setTimeout(sender.timeout, sender.TIMEOUT_DURATION);
+            // TODO add timeout in case no response is received
+        }
         // TODO check if serializeMessage is being used, might want to use JSON.stringify instead, since numbers are getting converted to strings
         sender.session.sendMessage(Clock.NAMESPACE, {type: message.type, data: message.data}, sender.onSuccess.bind(this, "Message sent: " + message), sender.onError);
     }
+};
+
+sender.timeout = function() {
+    //sender.setStatus(sender.lastMessage.errorStatus, 'error');
+    sender.setStatus('Timeout', 'error');
+    sender.enableControls(true);
 };
 
 sender.updateColors = function () {
