@@ -1,6 +1,4 @@
 sender = {};
-sender.applicationID = '8D74C526';
-sender.namespace = 'urn:x-cast:me.geniusburger.cast.wordclock';
 sender.session = null;
 sender.lastCookie = null;
 /**
@@ -19,7 +17,7 @@ sender.blocked = false;
  */
 sender.initializeCastApi = function () {
     sender.setStatus('Initializing...');
-    var sessionRequest = new chrome.cast.SessionRequest(sender.applicationID);
+    var sessionRequest = new chrome.cast.SessionRequest(Clock.APP_ID);
     var apiConfig = new chrome.cast.ApiConfig(sessionRequest, sender.sessionListener, sender.receiverListener);
     chrome.cast.initialize(apiConfig, sender.onInitSuccess, sender.onError);
 };
@@ -62,7 +60,7 @@ sender.sessionListener = function (e) {
     sender.log('New session ID:' + e.sessionId);
     sender.session = e;
     sender.session.addUpdateListener(sender.sessionUpdateListener);
-    sender.session.addMessageListener(sender.namespace, sender.receiverMessage);
+    sender.session.addMessageListener(Clock.NAMESPACE, sender.receiverMessage);
     sender.sendMessage(new InitializeMessage(sender.lastCookie));
 };
 
@@ -86,7 +84,7 @@ sender.sessionUpdateListener = function (isAlive) {
  */
 sender.receiverMessage = function (namespace, stringMessage) {
     sender.log("receiverMessage: " + namespace + ", " + stringMessage);
-    if (namespace === sender.namespace) {
+    if (namespace === Clock.NAMESPACE) {
         var message = JSON.parse(stringMessage);
         if (message.hasOwnProperty('type')) {
             var send = false;
@@ -215,7 +213,7 @@ sender.sendMessage = function (message) {
         sender.setStatus(message.sendingStatus);
         sender.lastMessage = message;
         sender.blocked = message.isBlocking;
-        sender.session.sendMessage(sender.namespace, {type: message.type, data: message.data}, sender.onSuccess.bind(this, "Message sent: " + message), sender.onError);
+        sender.session.sendMessage(Clock.NAMESPACE, {type: message.type, data: message.data}, sender.onSuccess.bind(this, "Message sent: " + message), sender.onError);
     }
 };
 

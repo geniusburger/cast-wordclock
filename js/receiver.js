@@ -1,8 +1,6 @@
 rcvr = {};
 
 rcvr.clock = null;
-
-rcvr.namespace = 'urn:x-cast:me.geniusburger.cast.wordclock';
 rcvr.intialized = false;
 
 rcvr.castInit = function () {
@@ -32,7 +30,7 @@ rcvr.castInit = function () {
     };
 
     // create a CastMessageBus to handle messages for a custom namespace
-    window.messageBus = window.castReceiverManager.getCastMessageBus(rcvr.namespace);
+    window.messageBus = window.castReceiverManager.getCastMessageBus(Clock.NAMESPACE);
 
     // handler for the CastMessageBus message event
     window.messageBus.onMessage = rcvr.onMessage;
@@ -51,7 +49,7 @@ rcvr.onMessage = function (event) {
             case Message.type.INITIALIZE:
                 // Only init if not initialized, otherwise don't respond
                 if( !rcvr.intialized) {
-                    rcvr.clock.updateSettings(message.settings);
+                    rcvr.clock.updateSettings(message.data);
                     window.castReceiverManager.setApplicationState('Initialized');
                     rcvr.sendMessage(new InitializedMessage(true, rcvr.clock.settings));
                 } else {
@@ -59,7 +57,7 @@ rcvr.onMessage = function (event) {
                 }
                 break;
             case Message.type.UPDATE:
-                rcvr.clock.updateSettings(message.settings);
+                rcvr.clock.updateSettings(message.data);
                 window.castReceiverManager.setApplicationState('Updated');
                 rcvr.sendMessage(new UpdatedMessage(true, rcvr.clock.settings));
                 rcvr.broadcast(new SettingsMessage(rcvr.clock.settings));

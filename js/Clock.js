@@ -103,6 +103,18 @@ function Clock(root) {
     this.start();
 }
 
+/**
+ * @type {string}
+ * @readonly
+ */
+Clock.APP_ID = '8D74C526';
+
+/**
+ * @type {string}
+ * @readonly
+ */
+Clock.NAMESPACE = 'urn:x-cast:me.geniusburger.cast.wordclock';
+
 Clock.defaults = {
     time: {
         now: new Date(),		    // Date, set the current time
