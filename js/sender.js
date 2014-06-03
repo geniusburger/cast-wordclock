@@ -133,26 +133,14 @@ sender.receiverMessage = function (namespace, stringMessage) {
 sender.processMessage = function (message) {
     switch (message.type) {
         case Message.type.INITIALIZED:
-            if (message.data.success) {
-                if (util.isValidObject(message.data.data, Clock.defaults, sender)) {
-                    // TODO handle checking if initialized correctly
-                    util.setCookie('settings', message.data.data);
-                    sender.loadSettings(message.data.data);
-                    return true;
-                } else {
-                    sender.log('Invalid settings object');
-                }
-            }
-            break;
         case Message.type.UPDATED:
             if (message.data.success) {
-                if (util.isValidObject(message.data.data, Clock.defaults, sender)) {
-                    // TODO handle checking if updated correctly
+                if (util.hasValidObjectValues(message.data.data, sender.lastMessage.data, sender)) {
                     util.setCookie('settings', message.data.data);
                     sender.loadSettings(message.data.data);
                     return true;
                 } else {
-                    sender.log('Invalid settings object');
+                    sender.log("Settings don't match {was} {should}", message.data.data, sender.lastMessage.data);
                 }
             }
             break;
@@ -276,7 +264,7 @@ sender.updateDuration = function () {
 };
 
 sender.log = function (message) {
-    console.log(message);
+    console.log.apply(this, arguments);
     var dw = document.getElementById("debugmessage");
     if (typeof message === 'object') {
         message = JSON.stringify(message);

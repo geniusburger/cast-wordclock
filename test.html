@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>test</title>
+    <script type="text/javascript" src="js/util.js"></script>
+</head>
+<body>
+Testing
+<script type="text/javascript">
+    var valid = {
+        date: new Date(1),
+        str: 'string_value',
+        num: 85,
+        bool: true,
+        obj: {
+            f: 'field'
+        }
+    };
+
+    var test = [
+        {
+            date: new Date(1),
+            str: 'string_value',
+            num: 85,
+            bool: true,
+            obj: {
+                f: 'field'
+            }
+        },
+        {
+            date: new Date(2),
+            str: 'string_value',
+            num: 85,
+            bool: true,
+            obj: {
+                f: 'field'
+            }
+        },
+        {
+            date: new Date(1),
+            str: 'string_value2',
+            num: 85,
+            bool: true,
+            obj: {
+                f: 'field'
+            }
+        },
+        {
+            date: new Date(1),
+            str: 'string_value',
+            num: 88,
+            bool: true,
+            obj: {
+                f: 'field'
+            }
+        },
+        {
+            date: new Date(1),
+            str: 'string_value',
+            num: 85,
+            bool: false,
+            obj: {
+                f: 'field'
+            }
+        },
+        {
+            date: new Date(1),
+            str: 'string_value',
+            num: 85,
+            bool: true,
+            obj: {
+                g: 'field'
+            }
+        },
+        {
+            date: new Date(1),
+            str: 'string_value',
+            num: 85,
+            bool: true,
+            obj: {
+                f: 'field2'
+            }
+        },
+        {
+            date: {f: 'field'},
+            str: 'string_value',
+            num: 85,
+            bool: true,
+            obj: {
+                f: 'field'
+            }
+        },
+        {
+            date: new Date(1),
+            str: 8,
+            num: 85,
+            bool: true,
+            obj: {
+                f: 'field'
+            }
+        },
+        {
+            date: new Date(1),
+            str: {r: 2},
+            num: 85,
+            bool: true,
+            obj: {
+                f: 'field'
+            }
+        },
+        {
+            date: new Date(1),
+            str: 'string_value',
+            num: 85,
+            bool: true,
+            obj: 3
+        },
+        {
+            date: new Date(1),
+            num: 85,
+            bool: true,
+            obj: {
+                f: 'field'
+            }
+        }
+    ];
+
+    var success = true;
+    console.log('valid', valid);
+    test.forEach(function (el, i) {
+        console.log('========================test ' + i, el);
+        var isValid = util.hasValidObjectValues(el, valid, console);
+        if ((i === 0 && !isValid) || (i > 0 && isValid)) {
+            success = false;
+            console.log('\n\n\nFAIL\n\n\n');
+        }
+    });
+    document.write('success: ' + success);
+</script>
+</body>
+</html>
