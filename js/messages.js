@@ -50,7 +50,6 @@ function Message(type, otherType, data, isRequest) {
  * @param {string} sendingStatus
  * @param {string} successStatus
  * @param {string} errorStatus
- * @private
  */
 Message.prototype.setBlocking = function(sendingStatus, successStatus, errorStatus) {
     this.isBlocking = true;
@@ -79,7 +78,7 @@ RequestMessage.prototype = Object.create(Message.prototype);
  * @constructor
  */
 function RequestMessage(type, responseType, data) {
-    Message.apply(this, [type, responseType, data, true]);
+    Message.call(this, type, responseType, data, true);
 }
 
 ResponseMessage.prototype = Object.create(Message.prototype);
@@ -88,7 +87,7 @@ ResponseMessage.prototype = Object.create(Message.prototype);
  * @constructor
  */
 function ResponseMessage(type, requestType, data, success) {
-    Message.apply(this, [type, requestType, {success: success, data: data}, false]);
+    Message.call(this, type, requestType, {success: success, data: data}, false);
 }
 
 ErrorMessage.prototype = Object.create(ResponseMessage.prototype);
@@ -97,7 +96,7 @@ ErrorMessage.prototype = Object.create(ResponseMessage.prototype);
  * @constructor
  */
 function ErrorMessage(error) {
-    ResponseMessage.apply(this, [Message.type.ERROR, null, error, false]);
+    ResponseMessage.call(this, Message.type.ERROR, null, error, false);
 }
 
 InitializeMessage.prototype = Object.create(RequestMessage.prototype);
@@ -106,7 +105,7 @@ InitializeMessage.prototype = Object.create(RequestMessage.prototype);
  * @constructor
  */
 function InitializeMessage(settings) {
-    RequestMessage.apply(this, [Message.type.INITIALIZE, Message.type.INITIALIZED, settings]);
+    RequestMessage.call(this, Message.type.INITIALIZE, Message.type.INITIALIZED, settings);
     this.setBlocking('Starting...', 'Started', 'Start Failed');
 }
 
@@ -116,7 +115,7 @@ InitializedMessage.prototype = Object.create(ResponseMessage.prototype);
  * @constructor
  */
 function InitializedMessage(success, settings) {
-    ResponseMessage.apply(this, [Message.type.INITIALIZED, Message.type.INITIALIZE, settings, success]);
+    ResponseMessage.call(this, Message.type.INITIALIZED, Message.type.INITIALIZE, settings, success);
 }
 
 UpdateMessage.prototype = Object.create(RequestMessage.prototype);
@@ -125,7 +124,7 @@ UpdateMessage.prototype = Object.create(RequestMessage.prototype);
  * @constructor
  */
 function UpdateMessage(settings) {
-    RequestMessage.apply(this, [Message.type.UPDATE, Message.type.UPDATED, settings]);
+    RequestMessage.call(this, Message.type.UPDATE, Message.type.UPDATED, settings);
     this.setBlocking('Updating...', 'Updated', 'Update Failed');
 }
 
@@ -135,7 +134,7 @@ UpdatedMessage.prototype = Object.create(ResponseMessage.prototype);
  * @constructor
  */
 function UpdatedMessage(success, settings) {
-    ResponseMessage.apply(this, [Message.type.UPDATED, Message.type.UPDATE, settings, success]);
+    ResponseMessage.call(this, Message.type.UPDATED, Message.type.UPDATE, settings, success);
 }
 
 SettingsMessage.prototype = Object.create(ResponseMessage.prototype);
@@ -144,7 +143,7 @@ SettingsMessage.prototype = Object.create(ResponseMessage.prototype);
  * @constructor
  */
 function SettingsMessage(settings) {
-    ResponseMessage.apply(this, [Message.type.SETTINGS, null, settings, true]);
+    ResponseMessage.call(this, Message.type.SETTINGS, null, settings, true);
     this.successStatus = 'Updated';
     this.errorStatus = 'Pull Update Failed';
 }

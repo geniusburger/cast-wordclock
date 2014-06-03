@@ -1,7 +1,7 @@
 rcvr = {};
 
 rcvr.clock = null;
-rcvr.intialized = false;
+rcvr.initialized = false;
 
 rcvr.castInit = function () {
     cast.receiver.logger.setLevelValue(0);
@@ -48,7 +48,8 @@ rcvr.onMessage = function (event) {
         switch(message.type) {
             case Message.type.INITIALIZE:
                 // Only init if not initialized, otherwise don't respond
-                if( !rcvr.intialized) {
+                if( !rcvr.initialized) {
+                    rcvr.initialized = true;
                     rcvr.clock.updateSettings(message.data);
                     window.castReceiverManager.setApplicationState('Initialized');
                     rcvr.sendMessage(new InitializedMessage(true, rcvr.clock.settings));
@@ -74,15 +75,23 @@ rcvr.onMessage = function (event) {
 };
 
 rcvr.sendMessage = function(event, message) {
-    window.messageBus.send(event.senderId, JSON.stringify(message));
+    var content = {type: message.type, data: message.data};
+    rcvr.log('sending', content);
+    window.messageBus.send(event.senderId, JSON.stringify(content));
 };
 
 rcvr.broadcast = function(message) {
-    window.messageBus.broadcast(JSON.stringify(message));
+    var content = {type: message.type, data: message.data};
+    rcvr.log('broadcasting', content);
+    window.messageBus.broadcast(JSON.stringify(content));
 };
 
 rcvr.log = function(message) {
-    console.log(message);
+    if( arguments.length > 1) {
+        console.log(arguments);
+    } else {
+        console.log(message);
+    }
     var dw = document.getElementById("debugmessage");
     if( typeof message === 'object') {
         message = JSON.stringify(message);

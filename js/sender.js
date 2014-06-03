@@ -100,6 +100,7 @@ sender.receiverMessage = function (namespace, stringMessage) {
             if (sender.blocked) {
                 if (sender.lastMessage.otherType === message.type) {
                     clearTimeout(sender.timeoutId);
+                    sender.log('cleared timeout');
                     sender.blocked = false; // Unblock
                     sender.enableControls(true);
                     send = true;
@@ -216,15 +217,20 @@ sender.sendMessage = function (message) {
         sender.setStatus(message.sendingStatus);
         sender.lastMessage = message;
         if( message.isBlocking) {
+            sender.log('starting timeout');
             sender.enableControls(false);
             sender.blocked = true;
             sender.timeoutId = setTimeout(sender.timeout, sender.TIMEOUT_DURATION);
         }
-        sender.session.sendMessage(Clock.NAMESPACE, JSON.stringify({type: message.type, data: message.data}), sender.onSuccess.bind(this, "Message sent: " + message), sender.onError);
+        var content = {type: message.type, data: message.data};
+        console.log('sending', content);
+        sender.session.sendMessage(Clock.NAMESPACE, JSON.stringify(content), sender.onSuccess.bind(this, "Message sent"), sender.onError);
     }
 };
 
 sender.timeout = function() {
+    sender.log('timed out');
+    sender.blocked = false;
     sender.setStatus('Timeout', 'error');
     sender.enableControls(true);
 };
@@ -264,7 +270,11 @@ sender.updateDuration = function () {
 };
 
 sender.log = function (message) {
-    console.log.apply(this, arguments);
+    if( arguments.length > 1) {
+        console.log(arguments);
+    } else {
+        console.log(message);
+    }
     var dw = document.getElementById("debugmessage");
     if (typeof message === 'object') {
         message = JSON.stringify(message);
