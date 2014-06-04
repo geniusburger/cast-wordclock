@@ -142,6 +142,7 @@ Clock.prototype.updateSettings = function (updates) {
         if (typeof updates.time.now === 'number') {
             this.settings.time.now = updates.time.now;
             this.updateClock(this.settings.time.now);
+            this.ticks = 0;
         }
         if (typeof updates.time.duration === 'number') {
             this.settings.time.duration = updates.time.duration;
@@ -215,11 +216,25 @@ Clock.prototype.stop = function () {
     this.interval = null;
 };
 
+Clock.prototype.finishLeadIn = function() {
+    console.log("starting after lead-in");
+    this.tick();
+    this.interval = setInterval(this.tick.bind(this), this.settings.time.duration);
+};
+
 Clock.prototype.start = function () {
     if (this.settings.time.run) {
         if (this.interval == null) {
-            console.log("starting");
-            this.interval = setInterval(this.tick.bind(this), this.settings.time.duration);
+
+            if(this.settings.time.duration === 60000) {
+                var secondsInMilliseconds = new Date(this.settings.time.now).getSeconds() * 1000;
+                var leadIn = this.settings.time.duration - secondsInMilliseconds;
+                console.log('leading in ' + leadIn);
+                this.interval = setTimeout(this.finishLeadIn.bind(this), leadIn);
+            } else {
+                console.log("starting without lead-in");
+                this.interval = setInterval(this.tick.bind(this), this.settings.time.duration);
+            }
         } else {
             console.error("can't start, interval is not null");
         }
