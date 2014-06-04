@@ -52,7 +52,8 @@ rcvr.onMessage = function (event) {
                     rcvr.initialized = true;
                     rcvr.clock.updateSettings(message.data);
                     window.castReceiverManager.setApplicationState('Initialized');
-                    rcvr.sendMessage(new InitializedMessage(true, rcvr.clock.settings));
+                    document.getElementById('clock').style.visibility = 'visible';
+                    rcvr.sendMessage(event, new InitializedMessage(true, rcvr.clock.settings));
                 } else {
                     window.castReceiverManager.setApplicationState('Ignored init message');
                 }
@@ -60,20 +61,25 @@ rcvr.onMessage = function (event) {
             case Message.type.UPDATE:
                 rcvr.clock.updateSettings(message.data);
                 window.castReceiverManager.setApplicationState('Updated');
-                rcvr.sendMessage(new UpdatedMessage(true, rcvr.clock.settings));
+                rcvr.sendMessage(event, new UpdatedMessage(true, rcvr.clock.settings));
                 rcvr.broadcast(new SettingsMessage(rcvr.clock.settings));
                 break;
             default:
                 window.castReceiverManager.setApplicationState('Received message with odd type');
-                rcvr.sendMessage(new ErrorMessage('Unexpected message type'));
+                rcvr.sendMessage(event, new ErrorMessage('Unexpected message type'));
                 break;
         }
     } else {
         window.castReceiverManager.setApplicationState('Received message without type');
-        rcvr.sendMessage(new ErrorMessage('Missing message type'));
+        rcvr.sendMessage(event, new ErrorMessage('Missing message type'));
     }
 };
 
+/**
+ * send a response message
+ * @param event
+ * @param {ResponseMessage} message
+ */
 rcvr.sendMessage = function(event, message) {
     var content = {type: message.type, data: message.data};
     rcvr.log('sending', content);

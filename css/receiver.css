@@ -17,9 +17,12 @@ html, body {
     vertical-align: middle;
 }
 
-#clock {
+.mono {
     font-family: monospace;
     font-size: 48px;
+}
+
+#clock {
     margin-top: 23px;
     vertical-align: middle;
 }

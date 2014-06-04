@@ -78,8 +78,8 @@ util.isValidObject = function(test, valid, logger, tab) {
 
 /**
  * Recursively validates that the test object contains the same properties and values as the valid object.
- * @param {object} test The object to check for properties and values.
- * @param {object} valid The object containing the properties and values representing a valid object.
+ * @param test The object to check for properties and values.
+ * @param valid The object containing the properties and values representing a valid object.
  * @param {object} logger Used to log messages during validation.
  * @param {string} [tab] Holds the current tab size for logging.
  * @returns {boolean} true if the test object contains the same properties and values as the valid object, false otherwise.
@@ -88,8 +88,11 @@ util.hasValidObjectValues = function(test, valid, logger, tab) {
     if (typeof tab === 'undefined') {
         tab = '';
     }
-    if (test instanceof Date || valid instanceof Date) {
-         return test instanceof Date && valid instanceof Date && test.getTime() === valid.getTime();
+    if (valid instanceof Date) {
+        if( typeof test === 'string') {
+            test = new Date(test);
+        }
+         return test instanceof Date && test.getTime() === valid.getTime();
     } else if( typeof valid === 'object') {
         for (var key in valid) {
             if (valid.hasOwnProperty(key)) {

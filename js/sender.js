@@ -1,5 +1,5 @@
 sender = {};
-sender.TIMEOUT_DURATION = 5000;
+sender.TIMEOUT_DURATION = 7000;
 sender.session = null;
 sender.lastCookie = null;
 /**
@@ -95,7 +95,7 @@ sender.receiverMessage = function (namespace, stringMessage) {
     if (namespace === Clock.NAMESPACE) {
         var message = JSON.parse(stringMessage);
         if (message.hasOwnProperty('type')) {
-            var send = false;
+            var process = false;
 
             if (sender.blocked) {
                 if (sender.lastMessage.otherType === message.type) {
@@ -103,16 +103,16 @@ sender.receiverMessage = function (namespace, stringMessage) {
                     sender.log('cleared timeout');
                     sender.blocked = false; // Unblock
                     sender.enableControls(true);
-                    send = true;
+                    process = true;
                 } else {
                     sender.log('Ignoring message type ' + message.type + ', waiting for unblocking message type ' + sender.lastMessage.otherType);
                     sender.setStatus('Blocked', 'error');
                 }
             } else {
-                send = true;
+                process = true;
             }
 
-            if (send) {
+            if (process) {
                 if (sender.processMessage(message)) {
                     sender.setStatus(sender.lastMessage.successStatus, sender.lastMessage.isBlocking ? 'success' : null);
                 } else {
@@ -147,12 +147,16 @@ sender.processMessage = function (message) {
             break;
         case Message.type.SETTINGS:
             // TODO handle current settings
-            if (util.isValidObject(message.data, Clock.defaults, sender)) {
-                util.setCookie('settings', message.data);
-                sender.loadSettings(message.data);
+            if (util.isValidObject(message.data.data, Clock.defaults, sender)) {
+                if (util.hasValidObjectValues(message.data.data, sender.lastMessage.data, sender)) {
+                    sender.log('settings match ours, ignoring');
+                } else {
+                    util.setCookie('settings', message.data.data);
+                    sender.loadSettings(message.data.data);
+                }
                 return true;
             } else {
-                sender.log('Invalid settings object');
+                sender.log('Invalid settings object {was} {should}', message.data.data, Clock.defaults);
             }
             break;
     }

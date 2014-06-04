@@ -117,8 +117,8 @@ Clock.NAMESPACE = 'urn:x-cast:me.geniusburger.cast.wordclock';
 
 Clock.defaults = {
     time: {
-        now: new Date(),		    // Date, set the current time
-        duration: 60000,		        // Number, [1,9007199254740992], set the duration of a minute
+        now: new Date().getTime(),  // Number, set the current time in milliseconds since midnight Jan 1, 1970
+        duration: 60000,		    // Number, [1,9007199254740992], set the duration of a minute
         run: true				    // Boolean, start/stop the clock
     },
     display: {
@@ -139,9 +139,9 @@ Clock.prototype.updateSettings = function (updates) {
 
     if (updates.hasOwnProperty('time')) {
         this.stop();
-        if (updates.time.now instanceof Date) {
+        if (typeof updates.time.now === 'number') {
             this.settings.time.now = updates.time.now;
-            this.updateClock();
+            this.updateClock(this.settings.time.now);
         }
         if (updates.time.hasOwnProperty('duration')) {
             var duration = parseInt(updates.time.duration);
@@ -235,10 +235,15 @@ Clock.prototype.on = function (el) {
 
 Clock.prototype.tick = function () {
     this.ticks++;
-    this.updateClock(new Date(this.settings.time.now.getTime() + (60000 * this.ticks)));
+    this.updateClock(this.settings.time.now + (60000 * this.ticks));
 };
 
-Clock.prototype.updateClock = function (date) {
+/**
+ * Update the clock display
+ * @param {number} time Number of milliseconds since midnight Jan 1, 1970
+ */
+Clock.prototype.updateClock = function (time) {
+    var date = new Date(time);
     console.log("updateClock", date);
     this.allOff();
     this.on(this.ITS);
