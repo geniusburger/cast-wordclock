@@ -98,6 +98,7 @@ function Clock(root) {
 
     this.settings = JSON.parse(JSON.stringify(Clock.defaults));
     this.settings.time.now = new Date();
+    this.leadIn = 0;
     this.updateClock(this.settings.time.now);
     this.ticks = 0;
     this.start();
@@ -141,8 +142,9 @@ Clock.prototype.updateSettings = function (updates) {
         this.stop();
         if (typeof updates.time.now === 'number') {
             this.settings.time.now = updates.time.now;
-            this.updateClock(this.settings.time.now);
             this.ticks = 0;
+            this.leadIn = 0;
+            this.updateClock(this.settings.time.now);
         }
         if (typeof updates.time.duration === 'number') {
             this.settings.time.duration = updates.time.duration;
@@ -218,6 +220,7 @@ Clock.prototype.stop = function () {
 
 Clock.prototype.finishLeadIn = function() {
     console.log("starting after lead-in");
+    this.ticks--;   // Remove a tick to account for the partial minute that passed during the lead-in time
     this.tick();
     this.interval = setInterval(this.tick.bind(this), this.settings.time.duration);
 };
@@ -228,10 +231,11 @@ Clock.prototype.start = function () {
 
             if(this.settings.time.duration === 60000) {
                 var secondsInMilliseconds = new Date(this.settings.time.now).getSeconds() * 1000;
-                var leadIn = this.settings.time.duration - secondsInMilliseconds;
-                console.log('leading in ' + leadIn);
-                this.interval = setTimeout(this.finishLeadIn.bind(this), leadIn);
+                this.leadIn = this.settings.time.duration - secondsInMilliseconds;
+                console.log('leading in ' + this.leadIn);
+                this.interval = setTimeout(this.finishLeadIn.bind(this), this.leadIn);
             } else {
+                this.leadIn = 0;
                 console.log("starting without lead-in");
                 this.interval = setInterval(this.tick.bind(this), this.settings.time.duration);
             }
@@ -255,7 +259,7 @@ Clock.prototype.tick = function () {
  * @param {number} time Number of milliseconds since midnight Jan 1, 1970
  */
 Clock.prototype.updateClock = function (time) {
-    var date = new Date(time);
+    var date = new Date(time + this.leadIn);
     console.log("updateClock", date);
     this.allOff();
     this.on(this.ITS);

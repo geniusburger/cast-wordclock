@@ -345,7 +345,8 @@ sender.init = function () {
     if (cookie == null) {
         cookie = Clock.defaults;
     }
-    cookie.time.now = new Date().getTime();
+    var now = new Date();
+    cookie.time.now = now.getTime() - now.getMilliseconds();
     sender.loadSettings(cookie);
     sender.enableControls(false);
     jscolor.init();
