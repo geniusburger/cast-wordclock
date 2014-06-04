@@ -140,12 +140,14 @@ InitializedMessage.prototype = Object.create(ResponseMessage.prototype);
 /**
  * @param {string} senderId ID of the request sender
  * @param {object} settings The current settings.
+ * @param {object} now The current time being displayed.
  * @augments ResponseMessage
  * @constructor
  */
-function InitializedMessage(senderId, settings) {
+function InitializedMessage(senderId, settings, now) {
     ResponseMessage.call(this, Message.type.INITIALIZED, Message.type.INITIALIZE, settings);
     this.data.senderId = senderId;
+    this.data.now = now;
 }
 
 UpdateMessage.prototype = Object.create(RequestMessage.prototype);
@@ -162,23 +164,27 @@ function UpdateMessage(settings) {
 UpdatedMessage.prototype = Object.create(ResponseMessage.prototype);
 /**
  * @param {object} settings The current settings.
+ * @param {object} now The current time being displayed.
  * @augments ResponseMessage
  * @constructor
  */
-function UpdatedMessage(settings) {
+function UpdatedMessage(settings, now) {
     ResponseMessage.call(this, Message.type.UPDATED, Message.type.UPDATE, settings);
+    this.data.now = now;
 }
 
 SettingsMessage.prototype = Object.create(ResponseMessage.prototype);
 /**
  * @param {string} senderId ID of the request sender
  * @param {object} settings The current settings.
+ * @param {object} now The current time being displayed.
  * @augments ResponseMessage
  * @constructor
  */
-function SettingsMessage(senderId, settings) {
+function SettingsMessage(senderId, settings, now) {
     ResponseMessage.call(this, Message.type.SETTINGS, null, settings);
     this.data.senderId = senderId;
+    this.data.now = now;
     this.successStatus = 'Updated';
     this.errorStatus = 'Pull Update Failed';
 }

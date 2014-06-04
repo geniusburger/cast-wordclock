@@ -71,6 +71,8 @@ sender.sessionListener = function (session) {
     sender.session = session;
     sender.session.addUpdateListener(sender.sessionUpdateListener);
     sender.session.addMessageListener(Clock.NAMESPACE, sender.receiverMessage);
+    var now = new Date();
+    sender.lastCookie.time.start = now.getTime() - now.getMilliseconds();
     sender.sendMessage(new InitializeMessage(sender.lastCookie));
 };
 
@@ -146,7 +148,7 @@ sender.processMessage = function (message) {
             if (message.data.success) {
                 if (util.hasValidObjectValues(message.data.data, sender.lastMessage.data, sender)) {
                     util.setCookie('settings', message.data.data);
-                    sender.loadSettings(message.data.data);
+                    sender.loadSettings(message.data.data, message.data.now);
                     return true;
                 } else {
                     sender.log("Settings don't match {was} {should}", message.data.data, sender.lastMessage.data);
@@ -162,7 +164,7 @@ sender.processMessage = function (message) {
                     sender.log('settings match ours, ignoring');
                 } else {
                     util.setCookie('settings', message.data.data);
-                    sender.loadSettings(message.data.data);
+                    sender.loadSettings(message.data.data, message.data.now);
                 }
                 return true;
             } else {
@@ -173,14 +175,19 @@ sender.processMessage = function (message) {
     return false;
 };
 
-sender.loadSettings = function (settings) {
+/**
+ * Display settings on the screen.
+ * @param {object} settings The current settings.
+ * @param {number} now The current clock time.
+ */
+sender.loadSettings = function (settings, now) {
     sender.lastCookie = settings;
     sender.enableControls(true, settings);
     document.getElementById('backgroundColor').value = settings.display.color.background;
     document.getElementById('activeColor').value = settings.display.color.active;
     document.getElementById('inactiveColor').value = settings.display.color.inactive;
     document.getElementById('duration').value = settings.time.duration;
-    var d = new Date(settings.time.start);
+    var d = new Date(now);
     var s = new Date(d.getTime() - (60000 * d.getTimezoneOffset())).toISOString().substring(0, 16);
     sender.log(d);
     sender.log(s);
@@ -345,9 +352,7 @@ sender.init = function () {
     if (cookie == null) {
         cookie = Clock.defaults;
     }
-    var now = new Date();
-    cookie.time.start = now.getTime() - now.getMilliseconds();
-    sender.loadSettings(cookie);
+    sender.loadSettings(cookie, new Date().getTime());
     sender.enableControls(false);
     jscolor.init();
     sender.showDuration();
