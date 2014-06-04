@@ -287,6 +287,10 @@ sender.updateRunOrStop = function () {
     sender.sendMessage(new UpdateMessage(settings));
 };
 
+sender.updateTime = function() {
+  // TODO update the time using the field in the display
+};
+
 sender.updateDuration = function () {
     var durationString = document.getElementById('duration').value;
     var duration = parseInt(durationString);
