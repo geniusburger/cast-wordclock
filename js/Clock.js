@@ -97,9 +97,9 @@ function Clock(root) {
     this.all = Array.prototype.slice.call(root.querySelectorAll('span'));
 
     this.settings = JSON.parse(JSON.stringify(Clock.defaults));
-    this.settings.time.now = new Date();
+    this.settings.time.start = new Date();
     this.leadIn = 0;
-    this.updateClock(this.settings.time.now);
+    this.updateClock(this.settings.time.start);
     this.ticks = 0;
     this.start();
 }
@@ -118,7 +118,7 @@ Clock.NAMESPACE = 'urn:x-cast:me.geniusburger.cast.wordclock';
 
 Clock.defaults = {
     time: {
-        now: new Date().getTime(),  // Number, set the current time in milliseconds since midnight Jan 1, 1970
+        start: new Date().getTime(),  // Number, set the current time in milliseconds since midnight Jan 1, 1970
         duration: 60000,		    // Number, [1,9007199254740992], set the duration of a minute
         run: true				    // Boolean, start/stop the clock
     },
@@ -140,11 +140,11 @@ Clock.prototype.updateSettings = function (updates) {
 
     if (updates.hasOwnProperty('time')) {
         this.stop();
-        if (typeof updates.time.now === 'number') {
-            this.settings.time.now = updates.time.now;
+        if (typeof updates.time.start === 'number') {
+            this.settings.time.start = updates.time.start;
             this.ticks = 0;
             this.leadIn = 0;
-            this.updateClock(this.settings.time.now);
+            this.updateClock(this.settings.time.start);
         }
         if (typeof updates.time.duration === 'number') {
             this.settings.time.duration = updates.time.duration;
@@ -230,7 +230,7 @@ Clock.prototype.start = function () {
         if (this.interval == null) {
 
             if(this.settings.time.duration === 60000) {
-                var secondsInMilliseconds = new Date(this.settings.time.now).getSeconds() * 1000;
+                var secondsInMilliseconds = new Date(this.settings.time.start).getSeconds() * 1000;
                 this.leadIn = this.settings.time.duration - secondsInMilliseconds;
                 console.log('leading in ' + this.leadIn);
                 this.interval = setTimeout(this.finishLeadIn.bind(this), this.leadIn);
@@ -251,7 +251,7 @@ Clock.prototype.on = function (el) {
 
 Clock.prototype.tick = function () {
     this.ticks++;
-    this.updateClock(this.settings.time.now + (60000 * this.ticks));
+    this.updateClock(this.settings.time.start + (60000 * this.ticks));
 };
 
 /**

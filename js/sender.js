@@ -180,7 +180,7 @@ sender.loadSettings = function (settings) {
     document.getElementById('activeColor').value = settings.display.color.active;
     document.getElementById('inactiveColor').value = settings.display.color.inactive;
     document.getElementById('duration').value = settings.time.duration;
-    var d = new Date(settings.time.now);
+    var d = new Date(settings.time.start);
     var s = new Date(d.getTime() - (60000 * d.getTimezoneOffset())).toISOString().substring(0, 16);
     sender.log(d);
     sender.log(s);
@@ -346,7 +346,7 @@ sender.init = function () {
         cookie = Clock.defaults;
     }
     var now = new Date();
-    cookie.time.now = now.getTime() - now.getMilliseconds();
+    cookie.time.start = now.getTime() - now.getMilliseconds();
     sender.loadSettings(cookie);
     sender.enableControls(false);
     jscolor.init();
