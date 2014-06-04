@@ -31,7 +31,7 @@ label {
     margin: 20px auto;
 }
 
-.color {
+input {
     font-family: monospace;
     font-size: 200%;
     margin-right: 0;

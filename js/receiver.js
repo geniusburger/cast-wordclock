@@ -53,16 +53,17 @@ rcvr.onMessage = function (event) {
                     rcvr.clock.updateSettings(message.data);
                     window.castReceiverManager.setApplicationState('Initialized');
                     document.getElementById('clock').style.visibility = 'visible';
-                    rcvr.sendMessage(event, new InitializedMessage(true, rcvr.clock.settings));
+                    rcvr.sendMessage(event, new InitializedMessage(event.senderId, rcvr.clock.settings));
                 } else {
                     window.castReceiverManager.setApplicationState('Ignored init message');
+                    rcvr.sendMessage(event, new InitializedMessage(event.senderId, rcvr.clock.settings).failed(ResponseMessage.reason.REINIT));
                 }
                 break;
             case Message.type.UPDATE:
                 rcvr.clock.updateSettings(message.data);
                 window.castReceiverManager.setApplicationState('Updated');
-                rcvr.sendMessage(event, new UpdatedMessage(true, rcvr.clock.settings));
-                rcvr.broadcast(new SettingsMessage(rcvr.clock.settings));
+                rcvr.sendMessage(event, new UpdatedMessage(rcvr.clock.settings));
+                rcvr.broadcast(new SettingsMessage(event.senderId, rcvr.clock.settings));
                 break;
             default:
                 window.castReceiverManager.setApplicationState('Received message with odd type');

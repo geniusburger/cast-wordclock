@@ -143,11 +143,8 @@ Clock.prototype.updateSettings = function (updates) {
             this.settings.time.now = updates.time.now;
             this.updateClock(this.settings.time.now);
         }
-        if (updates.time.hasOwnProperty('duration')) {
-            var duration = parseInt(updates.time.duration);
-            if (!isNaN(duration) && duration > 0) {
-                this.settings.time.duration = duration;
-            }
+        if (typeof updates.time.duration === 'number') {
+            this.settings.time.duration = updates.time.duration;
         }
         if (typeof updates.time.run === 'boolean') {
             this.settings.time.run = updates.time.run;

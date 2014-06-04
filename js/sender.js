@@ -2,6 +2,8 @@ sender = {};
 sender.TIMEOUT_DURATION = 7000;
 sender.session = null;
 sender.lastCookie = null;
+sender.myId = null;
+
 /**
  * Holds the most recently sent message.
  * @type {Message}
@@ -134,6 +136,12 @@ sender.receiverMessage = function (namespace, stringMessage) {
 sender.processMessage = function (message) {
     switch (message.type) {
         case Message.type.INITIALIZED:
+            sender.myId = message.data.senderId;
+            if( !message.data.success && message.data.reason === ResponseMessage.reason.REINIT) {
+                sender.log('app already started');
+                return true;
+            }
+            // fall-through
         case Message.type.UPDATED:
             if (message.data.success) {
                 if (util.hasValidObjectValues(message.data.data, sender.lastMessage.data, sender)) {
@@ -146,8 +154,10 @@ sender.processMessage = function (message) {
             }
             break;
         case Message.type.SETTINGS:
-            // TODO handle current settings
-            if (util.isValidObject(message.data.data, Clock.defaults, sender)) {
+            if (message.data.senderId === sender.myId) {
+                sender.log('ignoring our own settings update');
+                return true;
+            } else if (util.isValidObject(message.data.data, Clock.defaults, sender)) {
                 if (util.hasValidObjectValues(message.data.data, sender.lastMessage.data, sender)) {
                     sender.log('settings match ours, ignoring');
                 } else {
@@ -170,7 +180,7 @@ sender.loadSettings = function (settings) {
     document.getElementById('activeColor').value = settings.display.color.active;
     document.getElementById('inactiveColor').value = settings.display.color.inactive;
     document.getElementById('duration').value = settings.time.duration;
-    document.getElementById('run').innerHTML = settings.time.run ? 'Stop' : 'Run';
+    document.getElementById('run').innerHTML = settings.time.run ? 'Pause' : 'Run';
 };
 
 sender.enableControls = function (enable) {
@@ -220,7 +230,7 @@ sender.sendMessage = function (message) {
     } else {
         sender.setStatus(message.sendingStatus);
         sender.lastMessage = message;
-        if( message.isBlocking) {
+        if (message.isBlocking) {
             sender.log('starting timeout');
             sender.enableControls(false);
             sender.blocked = true;
@@ -232,7 +242,7 @@ sender.sendMessage = function (message) {
     }
 };
 
-sender.timeout = function() {
+sender.timeout = function () {
     sender.log('timed out');
     sender.blocked = false;
     sender.setStatus('Timeout', 'error');
@@ -264,17 +274,25 @@ sender.updateRunOrStop = function () {
 };
 
 sender.updateDuration = function () {
-    var settings = {
-        time: {
-            duration: document.getElementById('duration').value
-        }
-    };
-
-    sender.sendMessage(new UpdateMessage(settings));
+    var durationString = document.getElementById('duration').value;
+    var duration = parseInt(durationString);
+    var min = 10;
+    var max = 60000;
+    if (!isNaN(duration) && duration >= min && duration <= max) {
+        var settings = {
+            time: {
+                duration: duration
+            }
+        };
+        sender.sendMessage(new UpdateMessage(settings));
+    } else {
+        sender.log("invalid duration '" + durationString + '"');
+        sender.setStatus('Invalid Duration', 'error');
+    }
 };
 
 sender.log = function (message) {
-    if( arguments.length > 1) {
+    if (arguments.length > 1) {
         console.log(arguments);
     } else {
         console.log(message);
@@ -301,6 +319,17 @@ sender.setStatus = function (status, type) {
     }
 };
 
+sender.showDuration = function () {
+    util.setCookie('showDuration', true);
+    util.getParentByTagName('tr', document.getElementById('duration')).style.display = null;
+    util.getParentByTagName('tr', document.getElementById('updateDuration')).style.display = null;
+};
+
+sender.hideDuration = function () {
+    util.setCookie('showDuration', false);
+    util.getParentByTagName('tr', document.getElementById('duration')).style.display = 'none';
+    util.getParentByTagName('tr', document.getElementById('updateDuration')).style.display = 'none';
+};
 
 sender.init = function () {
     sender.log('init');
@@ -312,6 +341,10 @@ sender.init = function () {
     sender.loadSettings(cookie);
     sender.enableControls(false);
     jscolor.init();
+    sender.showDuration();
+//    if (util.getCookie('showDuration') === true) {
+//        sender.showDuration();
+//    }
 };
 
 window['__onGCastApiAvailable'] = function (loaded, errorInfo) {

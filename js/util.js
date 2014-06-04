@@ -50,6 +50,14 @@ util.removeChildren = function(parent) {
     }
 };
 
+util.getParentByTagName = function(tag, node) {
+    tag = tag.toUpperCase();
+    do {
+        node = node.parentNode;
+    } while (node !== null && node.nodeName !== tag )
+    return node;
+};
+
 /**
  * Recursively validates that the test object contains the same properties as the valid object. Does not check values.
  * @param {object} test The object to check for properties.
