@@ -180,6 +180,11 @@ sender.loadSettings = function (settings) {
     document.getElementById('activeColor').value = settings.display.color.active;
     document.getElementById('inactiveColor').value = settings.display.color.inactive;
     document.getElementById('duration').value = settings.time.duration;
+    var d = new Date(settings.time.now);
+    var s = new Date(d.getTime() - (60000 * d.getTimezoneOffset())).toISOString().substring(0, 16);
+    sender.log(d);
+    sender.log(s);
+    document.getElementById('time').value = s;
     document.getElementById('run').innerHTML = settings.time.run ? 'Pause' : 'Run';
 };
 
@@ -190,6 +195,8 @@ sender.enableControls = function (enable) {
     document.getElementById('updateColors').disabled = !enable;
     document.getElementById('duration').disabled = !enable;
     document.getElementById('updateDuration').disabled = !enable;
+    document.getElementById('time').disabled = !enable;
+    document.getElementById('updateTime').disabled = !enable;
     document.getElementById('run').disabled = !enable;
 };
 
@@ -338,6 +345,7 @@ sender.init = function () {
     if (cookie == null) {
         cookie = Clock.defaults;
     }
+    cookie.time.now = new Date().getTime();
     sender.loadSettings(cookie);
     sender.enableControls(false);
     jscolor.init();

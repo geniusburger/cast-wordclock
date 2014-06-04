@@ -28,26 +28,32 @@ limitations under the License.
 <body>
 <table id="controls">
     <tr>
-        <td colspan="2" align="center" class="wrapper"><label id="status">Disconnected</label></td>
+        <td colspan="2" align="center"><div class="wrapper"><label id="status">Disconnected</label></div></td>
+    </tr>
+    <tr>
+        <td colspan="2" align="center"><input id="time" class="border mono" type="datetime-local" disabled></td>
+    </tr>
+    <tr>
+        <td colspan="2"><button type="button" id="updateTime" class="border" onclick="sender.updateColors()" disabled>Update Time</button></td>
     </tr>
     <tr>
         <td align="right"><label for="backgroundColor">Background</label></td>
-        <td align="center"><input id="backgroundColor" class="color border" size="6" disabled></td>
+        <td align="right"><input id="backgroundColor" class="color border mono" size="6" type="text" disabled></td>
     </tr>
     <tr>
         <td align="right"><label for="activeColor">Active</label></td>
-        <td align="center"><input id="activeColor" class="color border" size="6" disabled></td>
+        <td align="right"><input id="activeColor" class="color border mono" size="6" type="text" disabled></td>
     </tr>
     <tr>
         <td align="right"><label for="inactiveColor">Inactive</label></td>
-        <td align="center"><input id="inactiveColor" class="color border" size="6" disabled></td>
+        <td align="right"><input id="inactiveColor" class="color border mono" size="6" type="text" disabled></td>
     </tr>
     <tr>
         <td colspan="2"><button type="button" id="updateColors" class="border" onclick="sender.updateColors()" disabled>Update Colors</button></td>
     </tr>
     <tr style="display:none;">
         <td align="right"><label for="duration">Milliseconds</label></td>
-        <td align="center"><input id="duration" class="border" size="6" disabled></td>
+        <td align="right"><input id="duration" class="border mono" size="6" type="text" disabled></td>
     </tr>
     <tr style="display:none;">
         <td colspan="2"><button type="button" id="updateDuration" class="border" onclick="sender.updateDuration()" disabled>Update Duration</button></td></td>
