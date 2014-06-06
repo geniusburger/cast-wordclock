@@ -1,23 +1,28 @@
 /**
  * Build a message to be sent.
- * @param {Message.type} type The type of this message.
- * @param {Message.type|null} otherType The type of the matching message.
+ * @param {Message.id} id The id of this message.
+ * @param {Message.id|null} otherId The id of the matching message.
  * @param {Object} data The data to be sent.
+ * @param {Message.type} [type=Message.type.REQUEST] The type of this message.
  * @constructor
  */
-function Message(type, otherType, data) {
+function Message(id, otherId, data, type) {
     /**
-     * @type {Message.type}
+     * @type {Message.id}
      */
-    this.type = type;
+    this.id = id;
     /**
      * @type {Object}
      */
     this.data = data;
     /**
-     * @type {Message.type|null}
+     * @type {Message.type}
      */
-    this.otherType = otherType;
+    this.type = typeof type === 'undefined' ? Message.type.REQUEST : type;
+    /**
+     * @type {Message.id|null}
+     */
+    this.otherId = otherId;
     /**
      * @type {string|null}
      */
@@ -50,43 +55,62 @@ Message.prototype.setBlocking = function(sendingStatus, successStatus, errorStat
 };
 
 /**
+ * Builds a simple object to send as a message.
+ * @returns {{type: Message.type, id: Message.id, data: *}}
+ */
+Message.prototype.buildObjectToSend = function() {
+    return {type: this.type, id: this.id, data: this.data};
+};
+
+/**
+ * Enum for message IDs.
+ * @readonly
+ * @enum {string}
+ */
+Message.id = {
+    INITIALIZE: 'Initialize',
+    INITIALIZED: 'Initialized',
+    UPDATE: 'Update',
+    UPDATED: 'Updated',
+    SETTINGS: 'Settings',
+    ERROR: 'Error',
+    TIME: 'Time'
+};
+
+/**
  * Enum for message types.
  * @readonly
  * @enum {string}
  */
 Message.type = {
-    INITIALIZE: 'initialize',
-    INITIALIZED: 'initialized',
-    UPDATE: 'update',
-    UPDATED: 'updated',
-    SETTINGS: 'settings',
-    ERROR: 'error',
-    TIME: 'time'
+    REQUEST: 'request',
+    RESPONSE: 'response',
+    BROADCAST: 'broadcast'
 };
 
 BroadcastMessage.prototype = Object.create(Message.prototype);
 /**
  * Build a broadcast message to be sent.
- * @param {Message.type} type The type of this message.
+ * @param {Message.id} id The id of this message.
  * @param {object} data The data to be sent.
  * @augments Message
  * @constructor
  */
-function BroadcastMessage(type, data) {
-    Message.call(this, type, null, data);
+function BroadcastMessage(id, data) {
+    Message.call(this, id, null, data, Message.type.BROADCAST);
 }
 
 ResponseMessage.prototype = Object.create(Message.prototype);
 /**
  * Build a response to be sent.
- * @param {Message.type} type The type of this message.
- * @param {Message.type|null} requestType The type of the matching request.
+ * @param {Message.id} id The id of this message.
+ * @param {Message.id|null} requestId The id of the matching request.
  * @param {object} data The data to be sent.
  * @augments Message
  * @constructor
  */
-function ResponseMessage(type, requestType, data) {
-    Message.call(this, type, requestType, {success: true, reason: null, data: data});
+function ResponseMessage(id, requestId, data) {
+    Message.call(this, id, requestId, {success: true, reason: null, data: data}, Message.type.RESPONSE);
 }
 
 /**
@@ -117,7 +141,7 @@ ErrorMessage.prototype = Object.create(ResponseMessage.prototype);
  * @constructor
  */
 function ErrorMessage(error) {
-    ResponseMessage.call(this, Message.type.ERROR, error);
+    ResponseMessage.call(this, Message.id.ERROR, error);
 }
 
 InitializeMessage.prototype = Object.create(Message.prototype);
@@ -127,7 +151,7 @@ InitializeMessage.prototype = Object.create(Message.prototype);
  * @constructor
  */
 function InitializeMessage(settings) {
-    Message.call(this, Message.type.INITIALIZE, Message.type.INITIALIZED, settings);
+    Message.call(this, Message.id.INITIALIZE, Message.id.INITIALIZED, settings);
     this.setBlocking('Starting...', 'Started', 'Start Failed');
 }
 
@@ -139,7 +163,7 @@ InitializedMessage.prototype = Object.create(ResponseMessage.prototype);
  * @constructor
  */
 function InitializedMessage(senderId, settings) {
-    ResponseMessage.call(this, Message.type.INITIALIZED, Message.type.INITIALIZE, settings);
+    ResponseMessage.call(this, Message.id.INITIALIZED, Message.id.INITIALIZE, settings);
     this.data.senderId = senderId;
 }
 
@@ -150,7 +174,7 @@ UpdateMessage.prototype = Object.create(Message.prototype);
  * @constructor
  */
 function UpdateMessage(settings) {
-    Message.call(this, Message.type.UPDATE, Message.type.UPDATED, settings);
+    Message.call(this, Message.id.UPDATE, Message.id.UPDATED, settings);
     this.setBlocking('Updating...', 'Updated', 'Update Failed');
 }
 
@@ -161,7 +185,7 @@ UpdatedMessage.prototype = Object.create(ResponseMessage.prototype);
  * @constructor
  */
 function UpdatedMessage(settings) {
-    ResponseMessage.call(this, Message.type.UPDATED, Message.type.UPDATE, settings);
+    ResponseMessage.call(this, Message.id.UPDATED, Message.id.UPDATE, settings);
 }
 
 SettingsMessage.prototype = Object.create(BroadcastMessage.prototype);
@@ -172,7 +196,7 @@ SettingsMessage.prototype = Object.create(BroadcastMessage.prototype);
  * @constructor
  */
 function SettingsMessage(senderId, settings) {
-    BroadcastMessage.call(this, Message.type.SETTINGS, settings);
+    BroadcastMessage.call(this, Message.id.SETTINGS, settings);
     this.data.senderId = senderId;
     this.successStatus = 'Remote Updated';
     this.errorStatus = 'Remote Update Failed';
@@ -186,7 +210,7 @@ TimeMessage.prototype = Object.create(BroadcastMessage.prototype);
  * @constructor
  */
 function TimeMessage(time) {
-    BroadcastMessage.call(this, Message.type.TIME, time);
+    BroadcastMessage.call(this, Message.id.TIME, time);
     this.successStatus = 'Tick';
     this.errorStatus = 'Tick Failed';
 }

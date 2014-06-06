@@ -44,9 +44,9 @@ rcvr.onMessage = function (event) {
     rcvr.log('Message [' + event.senderId + ']: ' + event.data);
 
     var message = JSON.parse(event.data);
-    if( message.hasOwnProperty('type')) {
-        switch(message.type) {
-            case Message.type.INITIALIZE:
+    if( message.hasOwnProperty('id')) {
+        switch(message.id) {
+            case Message.id.INITIALIZE:
                 // Only init if not initialized, otherwise don't respond
                 if( !rcvr.initialized) {
                     rcvr.initialized = true;
@@ -59,36 +59,40 @@ rcvr.onMessage = function (event) {
                     rcvr.sendMessage(event, new InitializedMessage(event.senderId, rcvr.clock.settings).failed(ResponseMessage.reason.REINIT));
                 }
                 break;
-            case Message.type.UPDATE:
+            case Message.id.UPDATE:
                 rcvr.clock.updateSettings(message.data);
                 window.castReceiverManager.setApplicationState('Updated');
                 rcvr.sendMessage(event, new UpdatedMessage(rcvr.clock.settings));
                 rcvr.broadcast(new SettingsMessage(event.senderId, rcvr.clock.settings));
                 break;
             default:
-                window.castReceiverManager.setApplicationState('Received message with odd type');
-                rcvr.sendMessage(event, new ErrorMessage('Unexpected message type'));
+                window.castReceiverManager.setApplicationState('Received message with odd id');
+                rcvr.sendMessage(event, new ErrorMessage('Unexpected message id'));
                 break;
         }
     } else {
-        window.castReceiverManager.setApplicationState('Received message without type');
-        rcvr.sendMessage(event, new ErrorMessage('Missing message type'));
+        window.castReceiverManager.setApplicationState('Received message without id');
+        rcvr.sendMessage(event, new ErrorMessage('Missing message id'));
     }
 };
 
 /**
- * send a response message
- * @param event
+ * Send a response message.
+ * @param event The event being responded to.
  * @param {ResponseMessage} message
  */
 rcvr.sendMessage = function(event, message) {
-    var content = {type: message.type, data: message.data};
+    var content = message.buildObjectToSend();
     rcvr.log('sending', content);
     window.messageBus.send(event.senderId, JSON.stringify(content));
 };
 
+/**
+ * Send a broadcast message.
+ * @param {BroadcastMessage} message
+ */
 rcvr.broadcast = function(message) {
-    var content = {type: message.type, data: message.data};
+    var content = message.buildObjectToSend();
     rcvr.log('broadcasting', content);
     window.messageBus.broadcast(JSON.stringify(content));
 };

@@ -98,18 +98,18 @@ sender.receiverMessage = function (namespace, stringMessage) {
     sender.log("receiverMessage: " + namespace + ", " + stringMessage);
     if (namespace === Clock.NAMESPACE) {
         var message = JSON.parse(stringMessage);
-        if (message.hasOwnProperty('type')) {
+        if (message.hasOwnProperty('id')) {
             var process = false;
 
             if (sender.blocked) {
-                if (sender.lastMessage.otherType === message.type) {
+                if (sender.lastMessage.otherId === message.id) {
                     clearTimeout(sender.timeoutId);
                     sender.log('cleared timeout');
                     sender.blocked = false; // Unblock
                     sender.enableControls(true);
                     process = true;
                 } else {
-                    sender.log('Ignoring message type ' + message.type + ', waiting for unblocking message type ' + sender.lastMessage.otherType);
+                    sender.log('Ignoring message id ' + message.id + ', waiting for unblocking message id ' + sender.lastMessage.otherId);
                     sender.setStatus('Blocked', 'error');
                 }
             } else {
@@ -118,14 +118,27 @@ sender.receiverMessage = function (namespace, stringMessage) {
 
             if (process) {
                 var success = sender.processMessage(message);
-                if (success === true) {
-                    sender.setStatus(sender.lastMessage.successStatus, sender.lastMessage.isBlocking ? 'success' : null);
-                } else if( success === false) {
-                    sender.setStatus(sender.lastMessage.errorStatus, 'error');
-                } else if( message.type === Message.type.TIME) {
-                    sender.setStatus(new TimeMessage(null).successStatus, 'success');
-                } else {
-                    // TODO anything?
+                switch(message.type) {
+                    case Message.type.BROADCAST:
+                        // Construct an empty shell of the same message to access it's message properties
+                        var shell = new window[message.id + 'Message']();
+                        if (success === true) {
+                            sender.setStatus(shell.successStatus, shell.isBlocking ? 'success' : null);
+                        } else {
+                            sender.setStatus(shell.errorStatus, 'error');
+                        }
+                        break;
+                    case Message.type.RESPONSE:
+                        if (success === true) {
+                            sender.setStatus(sender.lastMessage.successStatus, sender.lastMessage.isBlocking ? 'success' : null);
+                        } else {
+                            sender.setStatus(sender.lastMessage.errorStatus, 'error');
+                        }
+                        break;
+                    default:
+                        sender.log('unexpected message type ' + message.type);
+                        sender.setStatus('Unexpected Message', 'error');
+                        break;
                 }
             }
         } else {
@@ -141,15 +154,15 @@ sender.receiverMessage = function (namespace, stringMessage) {
  * @returns {boolean|null} true on success, false on error
  */
 sender.processMessage = function (message) {
-    switch (message.type) {
-        case Message.type.INITIALIZED:
+    switch (message.id) {
+        case Message.id.INITIALIZED:
             sender.myId = message.data.senderId;
             if( !message.data.success && message.data.reason === ResponseMessage.reason.REINIT) {
                 sender.log('app already started');
                 return true;
             }
             // fall-through
-        case Message.type.UPDATED:
+        case Message.id.UPDATED:
             if (message.data.success) {
                 if (util.hasValidObjectValues(message.data.data, sender.lastMessage.data, sender)) {
                     util.setCookie('settings', message.data.data);
@@ -159,28 +172,31 @@ sender.processMessage = function (message) {
                     sender.log("Settings don't match {was} {should}", message.data.data, sender.lastMessage.data);
                 }
             }
-            break;
-        case Message.type.SETTINGS:
+            return false;
+        case Message.id.SETTINGS:
             if (message.data.senderId === sender.myId) {
                 sender.log('ignoring our own settings update');
                 return null;
             } else if (util.isValidObject(message.data.data, Clock.defaults, sender)) {
                 if (util.hasValidObjectValues(message.data.data, sender.lastMessage.data, sender)) {
                     sender.log('settings match ours, ignoring');
+                    return null;
                 } else {
                     util.setCookie('settings', message.data.data);
                     sender.loadSettings(message.data.data);
+                    return true;
                 }
-                return true;
             } else {
                 sender.log('Invalid settings object {was} {should}', message.data.data, Clock.defaults);
+                return false;
             }
-            break;
-        case Message.type.TIME:
+        case Message.id.TIME:
             sender.loadTime(message.data);
-            return null;
+            return true;
+        default:
+            sender.log('Unexpected message id ' + message.id);
+            return false;
     }
-    return false;
 };
 
 /**
@@ -257,7 +273,7 @@ sender.sendMessage = function (message) {
             sender.blocked = true;
             sender.timeoutId = setTimeout(sender.timeout, sender.TIMEOUT_DURATION);
         }
-        var content = {type: message.type, data: message.data};
+        var content = message.buildObjectToSend();
         console.log('sending', content);
         sender.session.sendMessage(Clock.NAMESPACE, JSON.stringify(content), sender.onSuccess.bind(this, "Message sent"), sender.onError);
     }
