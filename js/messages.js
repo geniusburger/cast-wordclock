@@ -3,10 +3,9 @@
  * @param {Message.type} type The type of this message.
  * @param {Message.type|null} otherType The type of the matching message.
  * @param {Object} data The data to be sent.
- * @param {boolean} isRequest Indicates if this message is a request or a response
  * @constructor
  */
-function Message(type, otherType, data, isRequest) {
+function Message(type, otherType, data) {
     /**
      * @type {Message.type}
      */
@@ -35,14 +34,6 @@ function Message(type, otherType, data, isRequest) {
      * @type {boolean}
      */
     this.isBlocking = false;
-    /**
-     * @type {boolean}
-     */
-    this.isRequest = isRequest;
-    /**
-     * @type {boolean}
-     */
-    this.isResponse = !isRequest;
 }
 
 /**
@@ -69,16 +60,20 @@ Message.type = {
     UPDATE: 'update',
     UPDATED: 'updated',
     SETTINGS: 'settings',
-    ERROR: 'error'
+    ERROR: 'error',
+    TIME: 'time'
 };
 
-RequestMessage.prototype = Object.create(Message.prototype);
+BroadcastMessage.prototype = Object.create(Message.prototype);
 /**
+ * Build a broadcast message to be sent.
+ * @param {Message.type} type The type of this message.
+ * @param {object} data The data to be sent.
  * @augments Message
  * @constructor
  */
-function RequestMessage(type, responseType, data) {
-    Message.call(this, type, responseType, data, true);
+function BroadcastMessage(type, data) {
+    Message.call(this, type, null, data);
 }
 
 ResponseMessage.prototype = Object.create(Message.prototype);
@@ -86,12 +81,12 @@ ResponseMessage.prototype = Object.create(Message.prototype);
  * Build a response to be sent.
  * @param {Message.type} type The type of this message.
  * @param {Message.type|null} requestType The type of the matching request.
- * @param {Object} data The data to be sent.
+ * @param {object} data The data to be sent.
  * @augments Message
  * @constructor
  */
 function ResponseMessage(type, requestType, data) {
-    Message.call(this, type, requestType, {success: true, reason: null, data: data}, false);
+    Message.call(this, type, requestType, {success: true, reason: null, data: data});
 }
 
 /**
@@ -125,14 +120,14 @@ function ErrorMessage(error) {
     ResponseMessage.call(this, Message.type.ERROR, error);
 }
 
-InitializeMessage.prototype = Object.create(RequestMessage.prototype);
+InitializeMessage.prototype = Object.create(Message.prototype);
 /**
  * @param {object} settings The settings to initialize with.
- * @augments RequestMessage
+ * @augments Message
  * @constructor
  */
 function InitializeMessage(settings) {
-    RequestMessage.call(this, Message.type.INITIALIZE, Message.type.INITIALIZED, settings);
+    Message.call(this, Message.type.INITIALIZE, Message.type.INITIALIZED, settings);
     this.setBlocking('Starting...', 'Started', 'Start Failed');
 }
 
@@ -140,51 +135,59 @@ InitializedMessage.prototype = Object.create(ResponseMessage.prototype);
 /**
  * @param {string} senderId ID of the request sender
  * @param {object} settings The current settings.
- * @param {object} now The current time being displayed.
  * @augments ResponseMessage
  * @constructor
  */
-function InitializedMessage(senderId, settings, now) {
+function InitializedMessage(senderId, settings) {
     ResponseMessage.call(this, Message.type.INITIALIZED, Message.type.INITIALIZE, settings);
     this.data.senderId = senderId;
-    this.data.now = now;
 }
 
-UpdateMessage.prototype = Object.create(RequestMessage.prototype);
+UpdateMessage.prototype = Object.create(Message.prototype);
 /**
  * @param {object} settings The settings to update with.
- * @augments RequestMessage
+ * @augments Message
  * @constructor
  */
 function UpdateMessage(settings) {
-    RequestMessage.call(this, Message.type.UPDATE, Message.type.UPDATED, settings);
+    Message.call(this, Message.type.UPDATE, Message.type.UPDATED, settings);
     this.setBlocking('Updating...', 'Updated', 'Update Failed');
 }
 
 UpdatedMessage.prototype = Object.create(ResponseMessage.prototype);
 /**
  * @param {object} settings The current settings.
- * @param {object} now The current time being displayed.
  * @augments ResponseMessage
  * @constructor
  */
-function UpdatedMessage(settings, now) {
+function UpdatedMessage(settings) {
     ResponseMessage.call(this, Message.type.UPDATED, Message.type.UPDATE, settings);
-    this.data.now = now;
 }
 
-SettingsMessage.prototype = Object.create(ResponseMessage.prototype);
+SettingsMessage.prototype = Object.create(BroadcastMessage.prototype);
 /**
  * @param {string} senderId ID of the request sender
  * @param {object} settings The current settings.
- * @param {object} now The current time being displayed.
- * @augments ResponseMessage
+ * @augments BroadcastMessage
  * @constructor
  */
-function SettingsMessage(senderId, settings, now) {
-    ResponseMessage.call(this, Message.type.SETTINGS, null, settings);
+function SettingsMessage(senderId, settings) {
+    BroadcastMessage.call(this, Message.type.SETTINGS, settings);
     this.data.senderId = senderId;
-    this.data.now = now;
-    this.successStatus = 'Updated';
-    this.errorStatus = 'Pull Update Failed';
+    this.successStatus = 'Remote Updated';
+    this.errorStatus = 'Remote Update Failed';
 }
+
+TimeMessage.prototype = Object.create(BroadcastMessage.prototype);
+/**
+ * Broadcasts the current time being displayed.
+ * @param {number} time The time in milliseconds
+ * @augments BroadcastMessage
+ * @constructor
+ */
+function TimeMessage(time) {
+    BroadcastMessage.call(this, Message.type.TIME, time);
+    this.successStatus = 'Tick';
+    this.errorStatus = 'Tick Failed';
+}
+

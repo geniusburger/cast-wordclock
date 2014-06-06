@@ -53,17 +53,17 @@ rcvr.onMessage = function (event) {
                     rcvr.clock.updateSettings(message.data);
                     window.castReceiverManager.setApplicationState('Initialized');
                     document.getElementById('clock').style.visibility = 'visible';
-                    rcvr.sendMessage(event, new InitializedMessage(event.senderId, rcvr.clock.settings, rcvr.clock.now));
+                    rcvr.sendMessage(event, new InitializedMessage(event.senderId, rcvr.clock.settings));
                 } else {
                     window.castReceiverManager.setApplicationState('Ignored init message');
-                    rcvr.sendMessage(event, new InitializedMessage(event.senderId, rcvr.clock.settings, rcvr.clock.now).failed(ResponseMessage.reason.REINIT));
+                    rcvr.sendMessage(event, new InitializedMessage(event.senderId, rcvr.clock.settings).failed(ResponseMessage.reason.REINIT));
                 }
                 break;
             case Message.type.UPDATE:
                 rcvr.clock.updateSettings(message.data);
                 window.castReceiverManager.setApplicationState('Updated');
-                rcvr.sendMessage(event, new UpdatedMessage(rcvr.clock.settings, rcvr.clock.now));
-                rcvr.broadcast(new SettingsMessage(event.senderId, rcvr.clock.settings, rcvr.clock.now));
+                rcvr.sendMessage(event, new UpdatedMessage(rcvr.clock.settings));
+                rcvr.broadcast(new SettingsMessage(event.senderId, rcvr.clock.settings));
                 break;
             default:
                 window.castReceiverManager.setApplicationState('Received message with odd type');
@@ -93,6 +93,10 @@ rcvr.broadcast = function(message) {
     window.messageBus.broadcast(JSON.stringify(content));
 };
 
+rcvr.onTickListener = function(now) {
+    rcvr.broadcast(new TimeMessage(now));
+};
+
 rcvr.log = function(message) {
     if( arguments.length > 1) {
         console.log(arguments);
@@ -109,6 +113,7 @@ rcvr.log = function(message) {
 
 rcvr.receiverInit = function () {
     rcvr.clock = new Clock(document.getElementById('clock'));
+    rcvr.clock.setOnTickListener(rcvr.onTickListener, 15000);
     rcvr.castInit();
 };
 

@@ -117,10 +117,15 @@ sender.receiverMessage = function (namespace, stringMessage) {
             }
 
             if (process) {
-                if (sender.processMessage(message)) {
+                var success = sender.processMessage(message);
+                if (success === true) {
                     sender.setStatus(sender.lastMessage.successStatus, sender.lastMessage.isBlocking ? 'success' : null);
-                } else {
+                } else if( success === false) {
                     sender.setStatus(sender.lastMessage.errorStatus, 'error');
+                } else if( message.type === Message.type.TIME) {
+                    sender.setStatus(new TimeMessage(null).successStatus, 'success');
+                } else {
+                    // TODO anything?
                 }
             }
         } else {
@@ -133,7 +138,7 @@ sender.receiverMessage = function (namespace, stringMessage) {
 /**
  * Process a received message.
  * @param {Message} message
- * @returns {boolean} true on success, false on error
+ * @returns {boolean|null} true on success, false on error
  */
 sender.processMessage = function (message) {
     switch (message.type) {
@@ -148,7 +153,7 @@ sender.processMessage = function (message) {
             if (message.data.success) {
                 if (util.hasValidObjectValues(message.data.data, sender.lastMessage.data, sender)) {
                     util.setCookie('settings', message.data.data);
-                    sender.loadSettings(message.data.data, message.data.now);
+                    sender.loadSettings(message.data.data);
                     return true;
                 } else {
                     sender.log("Settings don't match {was} {should}", message.data.data, sender.lastMessage.data);
@@ -158,19 +163,22 @@ sender.processMessage = function (message) {
         case Message.type.SETTINGS:
             if (message.data.senderId === sender.myId) {
                 sender.log('ignoring our own settings update');
-                return true;
+                return null;
             } else if (util.isValidObject(message.data.data, Clock.defaults, sender)) {
                 if (util.hasValidObjectValues(message.data.data, sender.lastMessage.data, sender)) {
                     sender.log('settings match ours, ignoring');
                 } else {
                     util.setCookie('settings', message.data.data);
-                    sender.loadSettings(message.data.data, message.data.now);
+                    sender.loadSettings(message.data.data);
                 }
                 return true;
             } else {
                 sender.log('Invalid settings object {was} {should}', message.data.data, Clock.defaults);
             }
             break;
+        case Message.type.TIME:
+            sender.loadTime(message.data);
+            return null;
     }
     return false;
 };
@@ -178,21 +186,20 @@ sender.processMessage = function (message) {
 /**
  * Display settings on the screen.
  * @param {object} settings The current settings.
- * @param {number} now The current clock time.
  */
-sender.loadSettings = function (settings, now) {
+sender.loadSettings = function (settings) {
     sender.lastCookie = settings;
     sender.enableControls(true, settings);
     document.getElementById('backgroundColor').value = settings.display.color.background;
     document.getElementById('activeColor').value = settings.display.color.active;
     document.getElementById('inactiveColor').value = settings.display.color.inactive;
     document.getElementById('duration').value = settings.time.duration;
-    var d = new Date(now);
-    var s = new Date(d.getTime() - (60000 * d.getTimezoneOffset())).toISOString().substring(0, 16);
-    sender.log(d);
-    sender.log(s);
-    document.getElementById('time').value = s;
     document.getElementById('run').innerHTML = settings.time.run ? 'Pause' : 'Run';
+};
+
+sender.loadTime = function(now) {
+    var d = new Date(now);
+    document.getElementById('time').value = new Date(d.getTime() - (60000 * d.getTimezoneOffset())).toISOString().substring(0, 16);
 };
 
 sender.enableControls = function (enable) {
@@ -288,7 +295,15 @@ sender.updateRunOrStop = function () {
 };
 
 sender.updateTime = function() {
-  // TODO update the time using the field in the display
+    var d = new Date(document.getElementById('time').value);
+    var start = new Date(d.getTime() + (60000 * d.getTimezoneOffset())).getTime();
+    var settings = {
+        time: {
+            start: start
+        }
+    };
+
+    sender.sendMessage(new UpdateMessage(settings));
 };
 
 sender.updateDuration = function () {
@@ -356,7 +371,8 @@ sender.init = function () {
     if (cookie == null) {
         cookie = Clock.defaults;
     }
-    sender.loadSettings(cookie, new Date().getTime());
+    sender.loadSettings(cookie);
+    sender.loadTime(new Date().getTime());
     sender.enableControls(false);
     jscolor.init();
     sender.showDuration();

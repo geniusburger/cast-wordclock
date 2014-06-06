@@ -98,7 +98,14 @@ function Clock(root) {
     this.settings = JSON.parse(JSON.stringify(Clock.defaults));
     this.now = null;
     this.leadIn = 0;
+    this.onTickListener = null;
+    this.onTickDurationMin = 60000;
 }
+
+Clock.prototype.setOnTickListener = function(listener, durationMin) {
+    this.onTickListener = listener;
+    this.onTickDurationMin = durationMin;
+};
 
 /**
  * @type {string}
@@ -213,13 +220,6 @@ Clock.prototype.stop = function () {
     this.interval = null;
 };
 
-Clock.prototype.finishLeadIn = function() {
-    console.log("starting after lead-in");
-    this.now += this.leadIn;
-    this.updateClock();
-    this.interval = setInterval(this.tick.bind(this), this.settings.time.duration);
-};
-
 Clock.prototype.start = function () {
     if (this.settings.time.run) {
         if (this.interval == null) {
@@ -243,9 +243,24 @@ Clock.prototype.on = function (el) {
     el.classList.add('active');
 };
 
-Clock.prototype.tick = function () {
-    this.now += 60000;
+Clock.prototype.finishLeadIn = function() {
+    console.log("starting after lead-in");
+    this.now += this.leadIn;
+    this.callTickListener();
     this.updateClock();
+    this.interval = setInterval(this.tick.bind(this), this.settings.time.duration);
+};
+
+Clock.prototype.tick = function() {
+    this.now += 60000;
+    this.callTickListener();
+    this.updateClock();
+};
+
+Clock.prototype.callTickListener = function() {
+    if( this.onTickListener && this.settings.time.duration >= this.onTickDurationMin) {
+        this.onTickListener(this.now);
+    }
 };
 
 /**
