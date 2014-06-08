@@ -369,18 +369,6 @@ sender.setStatus = function (status, type) {
     }
 };
 
-sender.showDuration = function () {
-    util.setCookie('showDuration', true);
-    util.getParentByTagName('tr', document.getElementById('duration')).style.display = null;
-    util.getParentByTagName('tr', document.getElementById('updateDuration')).style.display = null;
-};
-
-sender.hideDuration = function () {
-    util.setCookie('showDuration', false);
-    util.getParentByTagName('tr', document.getElementById('duration')).style.display = 'none';
-    util.getParentByTagName('tr', document.getElementById('updateDuration')).style.display = 'none';
-};
-
 sender.init = function () {
     sender.log('init');
     sender.setStatus('Loading');
@@ -392,10 +380,6 @@ sender.init = function () {
     sender.loadTime(new Date().getTime());
     sender.enableControls(false);
     jscolor.init();
-    sender.showDuration();
-//    if (util.getCookie('showDuration') === true) {
-//        sender.showDuration();
-//    }
 };
 
 window['__onGCastApiAvailable'] = function (loaded, errorInfo) {
@@ -406,12 +390,4 @@ window['__onGCastApiAvailable'] = function (loaded, errorInfo) {
     }
 };
 
-sender.addEvent = function (el, evnt, func) {
-    if (el.addEventListener) {
-        el.addEventListener(evnt, func, false);
-    } else if (el.attachEvent) {
-        el.attachEvent('on' + evnt, func);
-    }
-};
-
-sender.addEvent(window, 'load', sender.init);
+util.addEvent(window, 'load', sender.init);

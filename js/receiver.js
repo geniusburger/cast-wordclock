@@ -2,6 +2,8 @@ rcvr = {};
 
 rcvr.clock = null;
 rcvr.initialized = false;
+rcvr.messageQueue = [];
+rcvr.isMessageDisplayed = false;
 
 rcvr.castInit = function () {
     cast.receiver.logger.setLevelValue(0);
@@ -44,16 +46,20 @@ rcvr.onMessage = function (event) {
     rcvr.log('Message [' + event.senderId + ']: ' + event.data);
 
     var message = JSON.parse(event.data);
-    if( message.hasOwnProperty('id')) {
-        switch(message.id) {
+    if (message.hasOwnProperty('id')) {
+        switch (message.id) {
             case Message.id.INITIALIZE:
                 // Only init if not initialized, otherwise don't respond
-                if( !rcvr.initialized) {
+                if (!rcvr.initialized) {
                     rcvr.initialized = true;
                     rcvr.clock.updateSettings(message.data);
                     window.castReceiverManager.setApplicationState('Initialized');
                     document.getElementById('clock').style.visibility = 'visible';
                     rcvr.sendMessage(event, new InitializedMessage(event.senderId, rcvr.clock.settings));
+                    rcvr.addToMessageQueue('Started');
+                    if (!rcvr.clock.settings.time.run) {
+                        rcvr.addToMessageQueue('Paused');
+                    }
                 } else {
                     window.castReceiverManager.setApplicationState('Ignored init message');
                     rcvr.sendMessage(event, new InitializedMessage(event.senderId, rcvr.clock.settings).failed(ResponseMessage.reason.REINIT));
@@ -64,6 +70,10 @@ rcvr.onMessage = function (event) {
                 window.castReceiverManager.setApplicationState('Updated');
                 rcvr.sendMessage(event, new UpdatedMessage(rcvr.clock.settings));
                 rcvr.broadcast(new SettingsMessage(event.senderId, rcvr.clock.settings));
+                rcvr.addToMessageQueue('Updated', 'Stuff');
+                if (!rcvr.clock.settings.time.run) {
+                    rcvr.addToMessageQueue('Paused');
+                }
                 break;
             default:
                 window.castReceiverManager.setApplicationState('Received message with odd id');
@@ -81,7 +91,7 @@ rcvr.onMessage = function (event) {
  * @param event The event being responded to.
  * @param {ResponseMessage} message
  */
-rcvr.sendMessage = function(event, message) {
+rcvr.sendMessage = function (event, message) {
     var content = message.buildObjectToSend();
     rcvr.log('sending', content);
     window.messageBus.send(event.senderId, JSON.stringify(content));
@@ -91,24 +101,71 @@ rcvr.sendMessage = function(event, message) {
  * Send a broadcast message.
  * @param {BroadcastMessage} message
  */
-rcvr.broadcast = function(message) {
+rcvr.broadcast = function (message) {
     var content = message.buildObjectToSend();
     rcvr.log('broadcasting', content);
     window.messageBus.broadcast(JSON.stringify(content));
 };
 
-rcvr.onTickListener = function(now) {
+rcvr.onTickListener = function (now) {
     rcvr.broadcast(new TimeMessage(now));
 };
 
-rcvr.log = function(message) {
-    if( arguments.length > 1) {
+/**
+ * Add a message to the message queue.
+ * @param {string} left Message to display on the left side.
+ * @param {string} [right] Message to display on the left side. Defaults to the left message.
+ */
+rcvr.addToMessageQueue = function (left, right) {
+    right = right || left;
+    rcvr.messageQueue.push({left: left, right: right});
+    if (!rcvr.isMessageDisplayed) {
+        rcvr.displayQueuedMessage();
+    }
+};
+
+rcvr.displayQueuedMessage = function () {
+    var message = rcvr.messageQueue.shift();
+    console.log('show', message);
+    if (message) {
+        rcvr.isMessageDisplayed = true;
+
+        var left = document.getElementById('leftMessage');
+        var right = document.getElementById('rightMessage');
+
+        left.querySelector('p').innerHTML = message.left;
+        right.querySelector('p').innerHTML = message.right;
+
+        util.removeEvent(left, 'transitionend', rcvr.displayQueuedMessage);
+        util.addEvent(left, 'transitionend', rcvr.hideMessage);
+
+        left.classList.add('animate-show');
+        right.classList.add('animate-show');
+    } else {
+        rcvr.isMessageDisplayed = false;
+    }
+};
+
+rcvr.hideMessage = function () {
+    console.log('hide');
+    var left = document.getElementById('leftMessage');
+    var right = document.getElementById('rightMessage');
+
+    util.removeEvent(left, 'transitionend', rcvr.hideMessage);
+    util.addEvent(left, 'transitionend', rcvr.displayQueuedMessage);
+
+    left.classList.remove('animate-show');
+    right.classList.remove('animate-show');
+};
+
+rcvr.log = function (message) {
+    if (arguments.length > 1) {
         console.log(arguments);
     } else {
         console.log(message);
     }
     var dw = document.getElementById("debugmessage");
-    if( typeof message === 'object') {
+    if (typeof message === 'object') {
         message = JSON.stringify(message);
     }
     dw.innerHTML += '\n' + message;
@@ -119,19 +176,11 @@ rcvr.receiverInit = function () {
     rcvr.clock = new Clock(document.getElementById('clock'));
     rcvr.clock.setOnTickListener(rcvr.onTickListener, 15000);
     rcvr.log(window.location.hostname);
-    if( window.location.hostname === 'localhost') {
+    if (window.location.hostname === 'localhost') {
         document.getElementById('clock').style.visibility = 'visible';
     } else {
         rcvr.castInit();
     }
 };
 
-rcvr.addEvent = function (el, evnt, func) {
-    if (el.addEventListener) {
-        el.addEventListener(evnt, func, false);
-    } else if (el.attachEvent) {
-        el.attachEvent('on' + evnt, func);
-    }
-};
-
-rcvr.addEvent(window, 'load', rcvr.receiverInit);
+util.addEvent(window, 'load', rcvr.receiverInit);

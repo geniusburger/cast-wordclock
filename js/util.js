@@ -6,6 +6,29 @@
 var util = {};
 
 /**
+ *
+ * @param el Element to add the event to.
+ * @param {string} name Name of the event.
+ * @param {function} func Function to call when the event fires.
+ */
+util.addEvent = function (el, name, func) {
+    if (el.addEventListener) {
+        el.addEventListener(name, func, false);
+    } else if (el.attachEvent) {
+        el.attachEvent('on' + name, func);
+    }
+};
+
+util.removeEvent = function(el, name, func) {
+    if( el.removeEventListener) {
+        el.removeEventListener(name, func, false);
+    } else if (el.detachEvent) {
+        el.detachEvent('on' + name, func);
+    }
+};
+
+
+/**
  * Retrieve a cookie from the browser.
  * @param  {string} name The name of the cookie to retrieve.
  * @return {string|object} Value of the cookie or null if not found.
