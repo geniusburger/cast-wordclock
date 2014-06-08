@@ -7,32 +7,31 @@ body {
 .active {
   color: #FFFFFF;
 }
-
-@animationDuration: 2s;
-@easing: linear;
 @margin: 23px;
 @width: 1280px;
 @height: 720px;
 @message-width: 250px;
 
-.animate {
-  -webkit-transition: @animationDuration @easing;
-  -moz-transition: @animationDuration @easing;
-  -ms-transition: @animationDuration @easing;
-  -o-transition: @animationDuration @easing;
-  transition: @animationDuration @easing;
+.animate(@duration, @easing) {
+  -webkit-transition: @duration @easing;
+  -moz-transition: @duration @easing;
+  -ms-transition: @duration @easing;
+  -o-transition: @duration @easing;
+  transition: @duration @easing;
 }
 
 .transform(@action) {
   -webkit-transform: @action;
   -moz-transform: @action;
   -o-transform: @action;
+  transform: @action;
 }
 
 .transform-origin(@origin) {
   -webkit-transform-origin: @origin;
   -moz-transform-origin: @origin;
   -o-transform-origin: @origin;
+  transform-origin: @origin;
 }
 
 .rotate(@degrees) {
@@ -89,16 +88,16 @@ html, body {
     height: @message-width;
     width: @height;
     font-family: sans-serif;
-    font-size: 100px;
+    font-size: 120px;
   }
 }
 
 .animate-hide {
-  .animate;
+  .animate(3s, ease-in);
   opacity: 0;
 }
 
 .animate-show {
-  .animate;
+  .animate(1s, ease-out);
   opacity: 1;
 }
