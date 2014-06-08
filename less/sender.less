@@ -1,5 +1,4 @@
-html,
-body {
+html, body {
   height: 100%;
   width: 100%;
   margin: 0;
@@ -8,68 +7,79 @@ body {
   font-family: sans-serif;
   background-color: black;
 }
+
 label {
   color: white;
 }
+
 .wrapper {
   margin: 2px 0px;
   padding: 1px;
   border: 2px solid black;
   border-radius: 5px;
+  &.error {
+    background-color: red;
+    border-color: red;
+  }
+  &.success {
+    background-color: green;
+    border-color: green;
+  }
 }
-.wrapper.error {
-  background-color: red;
-  border-color: red;
-}
-.wrapper.success {
-  background-color: green;
-  border-color: green;
-}
+
 #controls {
   margin: 20px auto;
 }
+
 .mono {
   font-family: monospace;
 }
+
 input[type=datetime-local] {
   margin-left: 0;
   margin-right: 0;
 }
+
 input[type=text] {
   font-size: 200%;
   margin-right: 0;
   padding: 2px 5px;
 }
+
 #debugSection {
   font-size: 100%;
 }
+
 .border {
   border: 2px solid #cccccc;
   border-radius: 5px;
+  &:focus {
+    outline: none;
+    border-color: #8ecaed;
+    box-shadow: 0 0 5px #8ecaed;
+  }
 }
-.border:focus {
-  outline: none;
-  border-color: #8ecaed;
-  box-shadow: 0 0 5px #8ecaed;
-}
+
 button {
   background-color: #888888;
   width: 100%;
   font-size: 125%;
   cursor: pointer;
+
+  &:hover {
+    background-color: #CCCCCC;
+  }
+  &:active {
+    background-color: #0091FF;
+  }
+  &:disabled {
+    background-color: #555555;
+    cursor: default;
+  }
+  &.border:focus {
+    outline: none;
+    border-color: #CCCCCC;
+    box-shadow: none;
+  }
 }
-button:hover {
-  background-color: #CCCCCC;
-}
-button:active {
-  background-color: #0091FF;
-}
-button:disabled {
-  background-color: #555555;
-  cursor: default;
-}
-button.border:focus {
-  outline: none;
-  border-color: #CCCCCC;
-  box-shadow: none;
-}
+

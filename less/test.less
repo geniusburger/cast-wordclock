@@ -1,0 +1,25 @@
+@animationDuration: 2s;
+@easing: linear;
+
+.animate {
+  -webkit-transition: @animationDuration @easing;
+  -moz-transition: @animationDuration @easing;
+  -ms-transition: @animationDuration @easing;
+  -o-transition: @animationDuration @easing;
+  transition: @animationDuration @easing;
+}
+
+.block {
+  background-color: gray;
+}
+
+.animate-hide {
+  .animate;
+  opacity: 0;
+}
+
+.animate-show {
+  .animate;
+  opacity: 1;
+}
+

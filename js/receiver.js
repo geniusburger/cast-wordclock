@@ -118,7 +118,12 @@ rcvr.log = function(message) {
 rcvr.receiverInit = function () {
     rcvr.clock = new Clock(document.getElementById('clock'));
     rcvr.clock.setOnTickListener(rcvr.onTickListener, 15000);
-    rcvr.castInit();
+    rcvr.log(window.location.hostname);
+    if( window.location.hostname === 'localhost') {
+        document.getElementById('clock').style.visibility = 'visible';
+    } else {
+        rcvr.castInit();
+    }
 };
 
 rcvr.addEvent = function (el, evnt, func) {
