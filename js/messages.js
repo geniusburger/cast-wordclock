@@ -32,6 +32,10 @@ function Message(id, otherId, data, type) {
      */
     this.successStatus = null;
     /**
+     * @type {boolean}
+     */
+    this.fadeOut = false;
+    /**
      * @type {string|null}
      */
     this.errorStatus = null;
@@ -211,6 +215,7 @@ TimeMessage.prototype = Object.create(BroadcastMessage.prototype);
  */
 function TimeMessage(time) {
     BroadcastMessage.call(this, Message.id.TIME, time);
+    this.fadeOut = true;
     this.successStatus = 'Tick';
     this.errorStatus = 'Tick Failed';
 }

@@ -127,6 +127,9 @@ sender.receiverMessage = function (namespace, stringMessage) {
                         } else {
                             sender.setStatus(shell.errorStatus, 'error');
                         }
+                        if( shell.fadeOut) {
+                            setTimeout(function() {document.getElementById('status').classList.add('animate-hide');}, 0);
+                        }
                         break;
                     case Message.type.RESPONSE:
                         if (success === true) {
@@ -358,6 +361,7 @@ sender.log = function (message) {
 sender.setStatus = function (status, type) {
     if (typeof status === 'string') {
         var label = document.getElementById('status');
+        label.classList.remove('animate-hide');
         label.innerHTML = status;
         label.parentNode.classList.remove('error');
         label.parentNode.classList.remove('success');

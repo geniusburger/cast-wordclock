@@ -73,3 +73,11 @@ button.border:focus {
   border-color: #CCCCCC;
   box-shadow: none;
 }
+.animate-hide {
+  -webkit-transition: 5s ease-out 3s;
+  -moz-transition: 5s ease-out 3s;
+  -ms-transition: 5s ease-out 3s;
+  -o-transition: 5s ease-out 3s;
+  transition: 5s ease-out 3s;
+  opacity: 0;
+}
