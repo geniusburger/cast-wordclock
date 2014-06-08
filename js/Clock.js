@@ -98,13 +98,17 @@ function Clock(root) {
     this.settings = JSON.parse(JSON.stringify(Clock.defaults));
     this.now = null;
     this.leadIn = 0;
-    this.onTickListener = null;
-    this.onTickDurationMin = 60000;
+    this.tickListener = null;
+    this.tickListenerDurationMin = 60000;
+    this.runUpdatedListener = null;
+    this.colorUpdatedListener = null;
+    this.durationUpdatedListener = null;
+    this.startUpdatedListener = null;
 }
 
-Clock.prototype.setOnTickListener = function(listener, durationMin) {
-    this.onTickListener = listener;
-    this.onTickDurationMin = durationMin;
+Clock.prototype.setTickListener = function(listener, durationMin) {
+    this.tickListener = listener;
+    this.tickListenerDurationMin = durationMin;
 };
 
 /**
@@ -147,12 +151,15 @@ Clock.prototype.updateSettings = function (updates) {
             this.settings.time.start = updates.time.start;
             this.now = this.settings.time.start;
             this.updateClock();
+            this.startUpdatedListener && this.startUpdatedListener();
         }
         if (typeof updates.time.duration === 'number') {
             this.settings.time.duration = updates.time.duration;
+            this.durationUpdatedListener && this.durationUpdatedListener();
         }
         if (typeof updates.time.run === 'boolean') {
             this.settings.time.run = updates.time.run;
+            this.runUpdatedListener && this.runUpdatedListener();
         }
         this.start();
     }
@@ -181,6 +188,7 @@ Clock.prototype.updateSettings = function (updates) {
 
             if (reColor) {
                 this.updateColors();
+                this.colorUpdatedListener && this.colorUpdatedListener();
             }
         }
     }
@@ -258,8 +266,8 @@ Clock.prototype.tick = function() {
 };
 
 Clock.prototype.callTickListener = function() {
-    if( this.onTickListener && this.settings.time.duration >= this.onTickDurationMin) {
-        this.onTickListener(this.now);
+    if( this.tickListener && this.settings.time.duration >= this.tickListenerDurationMin) {
+        this.tickListener(this.now);
     }
 };
 

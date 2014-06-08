@@ -56,10 +56,11 @@ rcvr.onMessage = function (event) {
                     window.castReceiverManager.setApplicationState('Initialized');
                     document.getElementById('clock').style.visibility = 'visible';
                     rcvr.sendMessage(event, new InitializedMessage(event.senderId, rcvr.clock.settings));
-                    rcvr.addToMessageQueue('Started');
-                    if (!rcvr.clock.settings.time.run) {
-                        rcvr.addToMessageQueue('Paused');
-                    }
+                    rcvr.addToMessageQueue(rcvr.clock.settings.time.run ? 'started' : 'paused');
+                    rcvr.clock.colorUpdatedListener = function(){rcvr.addToMessageQueue('updated', 'color')};
+                    rcvr.clock.durationUpdatedListener = function(){rcvr.addToMessageQueue('updated', 'duration')};
+                    rcvr.clock.startUpdatedListener = function(){rcvr.addToMessageQueue('updated', 'time')};
+                    rcvr.clock.runUpdatedListener = function(){rcvr.addToMessageQueue(rcvr.clock.settings.time.run ? 'started' : 'paused')};
                 } else {
                     window.castReceiverManager.setApplicationState('Ignored init message');
                     rcvr.sendMessage(event, new InitializedMessage(event.senderId, rcvr.clock.settings).failed(ResponseMessage.reason.REINIT));
@@ -70,10 +71,6 @@ rcvr.onMessage = function (event) {
                 window.castReceiverManager.setApplicationState('Updated');
                 rcvr.sendMessage(event, new UpdatedMessage(rcvr.clock.settings));
                 rcvr.broadcast(new SettingsMessage(event.senderId, rcvr.clock.settings));
-                rcvr.addToMessageQueue('Updated', 'Stuff');
-                if (!rcvr.clock.settings.time.run) {
-                    rcvr.addToMessageQueue('Paused');
-                }
                 break;
             default:
                 window.castReceiverManager.setApplicationState('Received message with odd id');
@@ -107,7 +104,7 @@ rcvr.broadcast = function (message) {
     window.messageBus.broadcast(JSON.stringify(content));
 };
 
-rcvr.onTickListener = function (now) {
+rcvr.tickListener = function (now) {
     rcvr.broadcast(new TimeMessage(now));
 };
 
@@ -172,9 +169,19 @@ rcvr.log = function (message) {
     dw.scrollTop = dw.scrollHeight;
 };
 
+
+
+rcvr.updateListener = function(type) {
+    rcvr.addToMessageQueue('updated', type);
+};
+
+rcvr.runUpdatedListener = function() {
+    rcvr.addToMessageQueue();
+};
+
 rcvr.receiverInit = function () {
     rcvr.clock = new Clock(document.getElementById('clock'));
-    rcvr.clock.setOnTickListener(rcvr.onTickListener, 15000);
+    rcvr.clock.setTickListener(rcvr.tickListener, 15000);
     rcvr.log(window.location.hostname);
     if (window.location.hostname === 'localhost') {
         document.getElementById('clock').style.visibility = 'visible';

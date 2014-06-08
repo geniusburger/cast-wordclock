@@ -66,7 +66,7 @@ body {
   height: 250px;
   width: 720px;
   font-family: sans-serif;
-  font-size: 80px;
+  font-size: 100px;
 }
 .animate-hide {
   -webkit-transition: 2s linear;

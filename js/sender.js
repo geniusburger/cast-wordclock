@@ -121,7 +121,7 @@ sender.receiverMessage = function (namespace, stringMessage) {
                 switch(message.type) {
                     case Message.type.BROADCAST:
                         // Construct an empty shell of the same message to access it's message properties
-                        var shell = new window[message.id + 'Message']();
+                        var shell = new window[message.id + 'Message']({});
                         if (success === true) {
                             sender.setStatus(shell.successStatus, shell.isBlocking ? 'success' : null);
                         } else {
