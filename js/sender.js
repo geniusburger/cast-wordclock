@@ -204,6 +204,7 @@ sender.processMessage = function (message) {
  * @param {object} settings The current settings.
  */
 sender.loadSettings = function (settings) {
+    delete settings.senderId;
     sender.lastCookie = settings;
     sender.enableControls(true, settings);
     document.getElementById('backgroundColor').value = settings.display.color.background;

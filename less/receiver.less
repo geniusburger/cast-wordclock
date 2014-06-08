@@ -1,9 +1,19 @@
 
+body {
+  background-color: #000000;
+  color: #333333;
+}
+
+.active {
+  color: #FFFFFF;
+}
+
 @animationDuration: 2s;
 @easing: linear;
 @margin: 23px;
 @width: 1280px;
 @height: 720px;
+@message-width: 250px;
 
 .animate {
   -webkit-transition: @animationDuration @easing;
@@ -29,22 +39,16 @@
   .transform(rotate(@degrees));
 }
 
-
-body {
-  background-color: #000000;
-  color: #333333;
-}
-
-.active {
-  color: #FFFFFF;
-}
-
 #clock {
-  border: 1px solid blue;
   position: absolute;
-  width: @width;
   left: 0;
-  top: @margin;
+  top: 0;
+  p {
+    width: @width;
+    height: @height;
+    display: table-cell;
+    vertical-align: middle;
+  }
 }
 
 html, body {
@@ -59,33 +63,29 @@ html, body {
 
 .mono {
   font-family: monospace;
-  font-size: 48px;
+  font-size: 52px;
 }
 
 .message {
-  border: 1px solid red;
   position: absolute;
-  //margin-top: @margin;
   top: @height;
 
   &.left {
     .rotate(-90deg);
     .transform-origin(top left);
-    //margin-left: @margin;
     left: 0;
   }
 
   &.right {
     .rotate(90deg);
     .transform-origin(top right);
-    //margin-right: @margin;
     right: 0;
   }
 
   p {
     display: table-cell;
     vertical-align: middle;
-    height: 250px;
+    height: @message-width;
     width: @height;
     font-family: sans-serif;
     font-size: 80px;
