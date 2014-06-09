@@ -4,6 +4,9 @@ rcvr.clock = null;
 rcvr.initialized = false;
 rcvr.messageQueue = [];
 rcvr.isMessageDisplayed = false;
+rcvr.defaultMessage = null;
+rcvr.isDefaultMessageDisplayed = false;
+rcvr.isDefaultMessageFading = false;
 
 rcvr.castInit = function () {
     cast.receiver.logger.setLevelValue(0);
@@ -56,11 +59,29 @@ rcvr.onMessage = function (event) {
                     window.castReceiverManager.setApplicationState('Initialized');
                     document.getElementById('clock').style.visibility = 'visible';
                     rcvr.sendMessage(event, new InitializedMessage(event.senderId, rcvr.clock.settings));
-                    rcvr.addToMessageQueue(rcvr.clock.settings.time.run ? 'started' : 'paused');
-                    rcvr.clock.colorUpdatedListener = function(){rcvr.addToMessageQueue('updated', 'color')};
-                    rcvr.clock.durationUpdatedListener = function(){rcvr.addToMessageQueue('updated', 'duration')};
-                    rcvr.clock.startUpdatedListener = function(){rcvr.addToMessageQueue('updated', 'time')};
-                    rcvr.clock.runUpdatedListener = function(){rcvr.addToMessageQueue(rcvr.clock.settings.time.run ? 'started' : 'paused')};
+                    if (rcvr.clock.settings.time.run) {
+                        rcvr.setDefaultMessage();
+                        rcvr.addToMessageQueue('started');
+                    } else {
+                        rcvr.setDefaultMessage('paused');
+                    }
+                    rcvr.clock.colorUpdatedListener = function () {
+                        rcvr.addToMessageQueue('updated', 'colors')
+                    };
+                    rcvr.clock.durationUpdatedListener = function () {
+                        rcvr.addToMessageQueue('updated', 'duration')
+                    };
+                    rcvr.clock.startUpdatedListener = function () {
+                        rcvr.addToMessageQueue('updated', 'time')
+                    };
+                    rcvr.clock.runUpdatedListener = function () {
+                        if (rcvr.clock.settings.time.run) {
+                            rcvr.setDefaultMessage();
+                            rcvr.addToMessageQueue('started');
+                        } else {
+                            rcvr.setDefaultMessage('paused');
+                        }
+                    };
                 } else {
                     window.castReceiverManager.setApplicationState('Ignored init message');
                     rcvr.sendMessage(event, new InitializedMessage(event.senderId, rcvr.clock.settings).failed(ResponseMessage.reason.REINIT));
@@ -114,6 +135,7 @@ rcvr.tickListener = function (now) {
  * @param {string} [right] Message to display on the left side. Defaults to the left message.
  */
 rcvr.addToMessageQueue = function (left, right) {
+    console.log('addToMessageQueue', left, right);
     right = right || left;
     rcvr.messageQueue.push({left: left, right: right});
     if (!rcvr.isMessageDisplayed) {
@@ -121,35 +143,110 @@ rcvr.addToMessageQueue = function (left, right) {
     }
 };
 
-rcvr.displayQueuedMessage = function () {
-    var message = rcvr.messageQueue.shift();
-    console.log('show', message);
-    if (message) {
-        rcvr.isMessageDisplayed = true;
-
-        var left = document.getElementById('leftMessage');
-        var right = document.getElementById('rightMessage');
-
-        left.querySelector('p').innerHTML = message.left;
-        right.querySelector('p').innerHTML = message.right;
-
-        util.removeEvent(left, 'transitionend', rcvr.displayQueuedMessage);
-        util.addEvent(left, 'transitionend', rcvr.hideMessage);
-
-        left.classList.add('animate-show');
-        right.classList.add('animate-show');
+rcvr.setDefaultMessage = function (left, right) {
+    console.log('setDefaultMessage', left, right);
+    right = right || left;
+    if (left) {
+        if (rcvr.defaultMessage) {
+            console.log('updating default message');
+            rcvr.defaultMessage = {left: left, right: right};
+            if (!rcvr.isMessageDisplayed) {
+                console.log('switching to new default');
+                rcvr.hideDefaultMessage(document.getElementById('leftMessage'), document.getElementById('rightMessage'));
+            }
+        } else {
+            console.log('new default message');
+            rcvr.defaultMessage = {left: left, right: right};
+            rcvr.displayQueuedMessage();
+        }
     } else {
-        rcvr.isMessageDisplayed = false;
+        console.log('clearing default message');
+        rcvr.defaultMessage = null;
+        rcvr.displayQueuedMessage();
     }
 };
 
+rcvr.hideDefaultMessage = function (left, right) {
+    console.log('hideDefaultMessage');
+    if (rcvr.isDefaultMessageDisplayed && !rcvr.isDefaultMessageFading) {
+        console.log('hiding default');
+        rcvr.isDefaultMessageFading = true;
+        util.addEvent(left, 'transitionend', rcvr.doneHidingDefaultMessage);
+        left.classList.remove('animate-show');
+        right.classList.remove('animate-show');
+    }
+};
+
+rcvr.doneHidingDefaultMessage = function () {
+    console.log('done hiding default');
+    util.removeEvent(document.getElementById('leftMessage'), 'transitionend', rcvr.doneHidingDefaultMessage);
+    rcvr.isDefaultMessageDisplayed = false;
+    rcvr.isDefaultMessageFading = false;
+    rcvr.displayQueuedMessage();
+};
+
+rcvr.displayQueuedMessage = function () {
+    if (rcvr.isMessageDisplayed) {
+        console.log('message already displayed');
+        return;
+    }
+    var message = rcvr.messageQueue.shift();
+    console.log('displayQueuedMessage', message);
+    var left = document.getElementById('leftMessage');
+    var right = document.getElementById('rightMessage');
+
+    if (message) {
+        console.log('message to display');
+        if (rcvr.isDefaultMessageDisplayed) {
+            console.log('need to hide default');
+            // fade out the default message first, need to put the message back
+            rcvr.messageQueue.unshift(message);
+            rcvr.hideDefaultMessage(left, right);
+        } else {
+            console.log('displaying message');
+            rcvr.isMessageDisplayed = true;
+
+            left.querySelector('p').innerHTML = message.left;
+            right.querySelector('p').innerHTML = message.right;
+
+            util.addEvent(left, 'transitionend', rcvr.hideMessage);
+
+            left.classList.add('animate-show');
+            right.classList.add('animate-show');
+        }
+    } else {
+        console.log('no message to display');
+        rcvr.isMessageDisplayed = false;
+        if (rcvr.defaultMessage) {
+            console.log('defaulting');
+
+            rcvr.isDefaultMessageDisplayed = true;
+
+            left.querySelector('p').innerHTML = rcvr.defaultMessage.left;
+            right.querySelector('p').innerHTML = rcvr.defaultMessage.right;
+
+            left.classList.add('animate-show');
+            right.classList.add('animate-show');
+        } else {
+            rcvr.hideDefaultMessage(left, right);
+        }
+    }
+};
+
+rcvr.doneHidingMessage = function () {
+    console.log('done hiding message');
+    util.removeEvent(document.getElementById('leftMessage'), 'transitionend', rcvr.doneHidingMessage);
+    rcvr.isMessageDisplayed = false;
+    rcvr.displayQueuedMessage();
+};
+
 rcvr.hideMessage = function () {
-    console.log('hide');
+    console.log('hiding message');
     var left = document.getElementById('leftMessage');
     var right = document.getElementById('rightMessage');
 
     util.removeEvent(left, 'transitionend', rcvr.hideMessage);
-    util.addEvent(left, 'transitionend', rcvr.displayQueuedMessage);
+    util.addEvent(left, 'transitionend', rcvr.doneHidingMessage);
 
     left.classList.remove('animate-show');
     right.classList.remove('animate-show');
@@ -175,7 +272,21 @@ rcvr.receiverInit = function () {
     rcvr.log(window.location.hostname);
     if (window.location.hostname === 'localhost') {
         document.getElementById('clock').style.visibility = 'visible';
-        ['one','two','three','four','five','six','seven','eight','nine','ten'].forEach(function(m) {rcvr.addToMessageQueue(m);});
+        ['one'].forEach(function (m) {
+            rcvr.addToMessageQueue(m);
+        });
+//        rcvr.setDefaultMessage('default');
+//        setTimeout(function () {
+//            ['two'].forEach(function (m) {
+//                rcvr.addToMessageQueue(m);
+//            });
+//            setTimeout(function () {
+//                rcvr.setDefaultMessage('next');
+//                setTimeout(function () {
+//                    rcvr.setDefaultMessage();
+//                }, 5000);
+//            }, 10000);
+//        }, 10000);
     } else {
         rcvr.castInit();
     }

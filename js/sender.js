@@ -1,5 +1,7 @@
 sender = {};
 sender.TIMEOUT_DURATION = 7000;
+sender.DURATION_MIN = 10;
+sender.DURATION_MAX = 60000;
 sender.session = null;
 sender.lastCookie = null;
 sender.myId = null;
@@ -329,9 +331,7 @@ sender.updateTime = function() {
 sender.updateDuration = function () {
     var durationString = document.getElementById('duration').value;
     var duration = parseInt(durationString);
-    var min = 10;
-    var max = 60000;
-    if (!isNaN(duration) && duration >= min && duration <= max) {
+    if (!isNaN(duration) && duration >= sender.DURATION_MIN && duration <= sender.DURATION_MAX) {
         var settings = {
             time: {
                 duration: duration
@@ -388,7 +388,11 @@ sender.init = function () {
 
 window['__onGCastApiAvailable'] = function (loaded, errorInfo) {
     if (loaded) {
-        sender.initializeCastApi();
+        if( window.location.hostname === 'localhost') {
+            sender.enableControls(true);
+        } else {
+            sender.initializeCastApi();
+        }
     } else {
         sender.log(errorInfo);
     }
