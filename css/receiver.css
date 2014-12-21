@@ -1,3 +1,4 @@
+@import url(http://fonts.googleapis.com/css?family=Fira+Mono);
 body {
   background-color: #000000;
   color: #333333;
@@ -27,8 +28,9 @@ body {
   overflow: hidden;
 }
 .mono {
-  font-family: monospace;
+  font-family: 'Fira Mono';
   font-size: 52px;
+  line-height: 1.0;
 }
 .message {
   overflow-y: hidden;
@@ -66,18 +68,18 @@ body {
   font-size: 120px;
 }
 .animate-hide {
-  -webkit-transition: 3s ease-in;
-  -moz-transition: 3s ease-in;
-  -ms-transition: 3s ease-in;
-  -o-transition: 3s ease-in;
-  transition: 3s ease-in;
+  -webkit-transition: 3s ease-in 0s;
+  -moz-transition: 3s ease-in 0s;
+  -ms-transition: 3s ease-in 0s;
+  -o-transition: 3s ease-in 0s;
+  transition: 3s ease-in 0s;
   opacity: 0;
 }
 .animate-show {
-  -webkit-transition: 1s ease-out;
-  -moz-transition: 1s ease-out;
-  -ms-transition: 1s ease-out;
-  -o-transition: 1s ease-out;
-  transition: 1s ease-out;
+  -webkit-transition: 1s ease-out 0s;
+  -moz-transition: 1s ease-out 0s;
+  -ms-transition: 1s ease-out 0s;
+  -o-transition: 1s ease-out 0s;
+  transition: 1s ease-out 0s;
   opacity: 1;
 }

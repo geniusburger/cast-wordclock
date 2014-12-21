@@ -275,18 +275,6 @@ rcvr.receiverInit = function () {
         ['one'].forEach(function (m) {
             rcvr.addToMessageQueue(m);
         });
-//        rcvr.setDefaultMessage('default');
-//        setTimeout(function () {
-//            ['two'].forEach(function (m) {
-//                rcvr.addToMessageQueue(m);
-//            });
-//            setTimeout(function () {
-//                rcvr.setDefaultMessage('next');
-//                setTimeout(function () {
-//                    rcvr.setDefaultMessage();
-//                }, 5000);
-//            }, 10000);
-//        }, 10000);
     } else {
         rcvr.castInit();
     }
