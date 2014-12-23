@@ -270,11 +270,15 @@ rcvr.receiverInit = function () {
     rcvr.clock = new Clock(document.getElementById('clock'));
     rcvr.clock.setTickListener(rcvr.tickListener, 15000);
     rcvr.log(window.location.hostname);
-    if (window.location.hostname === 'localhost') {
+    if (window.location.hostname === 'localhost' || !chrome || !chrome.cast) {
         document.getElementById('clock').style.visibility = 'visible';
-        ['one'].forEach(function (m) {
-            rcvr.addToMessageQueue(m);
-        });
+        //['test msg'].forEach(function (m) {
+        //    rcvr.addToMessageQueue(m);
+        //});
+        rcvr.clock.now = new Date().getTime();
+        rcvr.clock.setTickListener(null, 15000);
+        rcvr.clock.updateClock();
+        rcvr.clock.start();
     } else {
         rcvr.castInit();
     }
