@@ -266,16 +266,35 @@ rcvr.log = function (message) {
     dw.scrollTop = dw.scrollHeight;
 };
 
+rcvr.getQueryVariable = function(variable)
+{
+    var query = window.location.search.substring(1);
+    var vars = query.split("&");
+    for (var i = 0; i < vars.length; i++) {
+        var pair = vars[i].split("=");
+        if( pair[0] == variable){
+            return pair.length === 2 ? pair[1] : true;;
+        }
+    }
+    return false;
+};
+
 rcvr.receiverInit = function () {
     rcvr.clock = new Clock(document.getElementById('clock'));
     rcvr.clock.setTickListener(rcvr.tickListener, 15000);
     rcvr.log(window.location.hostname);
-    if (window.location.hostname === 'localhost' || !chrome || !chrome.cast) {
+
+
+    if (window.location.hostname === 'localhost' || rcvr.getQueryVariable('test')) {
         document.getElementById('clock').style.visibility = 'visible';
         //['test msg'].forEach(function (m) {
         //    rcvr.addToMessageQueue(m);
         //});
         rcvr.clock.now = new Date().getTime();
+        var duration = rcvr.getQueryVariable('duration');
+        if( duration) {
+            rcvr.clock.settings.time.duration = duration;
+        }
         rcvr.clock.setTickListener(null, 15000);
         rcvr.clock.updateClock();
         rcvr.clock.start();
