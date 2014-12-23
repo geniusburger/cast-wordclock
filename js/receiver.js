@@ -285,19 +285,21 @@ rcvr.receiverInit = function () {
     rcvr.log(window.location.hostname);
 
 
-    if (window.location.hostname === 'localhost' || rcvr.getQueryVariable('test')) {
+    if (window.location.hostname === 'localhost' || rcvr.getQueryVariable('demo')) {
         document.getElementById('clock').style.visibility = 'visible';
-        //['test msg'].forEach(function (m) {
-        //    rcvr.addToMessageQueue(m);
-        //});
         rcvr.clock.now = new Date().getTime();
-        var duration = rcvr.getQueryVariable('duration');
-        if( duration) {
-            rcvr.clock.settings.time.duration = duration;
+        var ms = rcvr.getQueryVariable('ms');
+        if (ms) {
+            rcvr.clock.settings.time.duration = ms;
         }
         rcvr.clock.setTickListener(null, 15000);
         rcvr.clock.updateClock();
         rcvr.clock.start();
+        [['demo', '1000ms']].forEach(function (m) {
+            rcvr.addToMessageQueue.apply(rcvr,m);
+        });
+    } else if(window.navigator.userAgent.indexOf('CrKey') === -1) {
+        document.getElementById('demo').style.display = '';
     } else {
         rcvr.castInit();
     }

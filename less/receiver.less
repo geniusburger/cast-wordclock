@@ -1,5 +1,4 @@
 @import "animate.less";
-@import url(http://fonts.googleapis.com/css?family=Fira+Mono);
 
 body {
   background-color: #000000;
@@ -56,9 +55,19 @@ html, body {
 }
 
 .mono {
-  font-family: 'Fira Mono', ;
+  font-family: 'Fira Mono', monospace;
   font-size: 52px;
   line-height: 1.0;
+}
+
+#demo {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  a:active, a:hover, a:visited, a:link {
+    color: white;
+    text-decoration: none !important;
+  }
 }
 
 .message {
