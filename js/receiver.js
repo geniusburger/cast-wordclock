@@ -267,8 +267,7 @@ rcvr.log = function (message) {
     dw.scrollTop = dw.scrollHeight;
 };
 
-rcvr.getQueryVariable = function(variable)
-{
+rcvr.getQueryVariable = function(variable) {
     var query = window.location.search.substring(1);
     var vars = query.split("&");
     for (var i = 0; i < vars.length; i++) {
@@ -288,15 +287,16 @@ rcvr.receiverInit = function () {
 
     if (window.location.hostname === 'localhost' || rcvr.getQueryVariable('demo')) {
         document.getElementById('clock').style.visibility = 'visible';
-        rcvr.clock.now = new Date().getTime();
-        var ms = rcvr.getQueryVariable('ms');
-        if (ms) {
-            rcvr.clock.settings.time.duration = ms;
-        }
+        var settings = {
+            time: {
+                start: new Date().getTime(),
+                run: true,
+                duration: rcvr.getQueryVariable('ms') || 60000
+            }
+        };
         rcvr.clock.setTickListener(null, 15000);
-        rcvr.clock.updateClock();
-        rcvr.clock.start();
-        [['demo', '1000ms']].forEach(function (m) {
+        rcvr.clock.updateSettings(settings);
+        [['demo', settings.time.duration + 'ms']].forEach(function (m) {
             rcvr.addToMessageQueue.apply(rcvr,m);
         });
     } else if(window.navigator.userAgent.indexOf('CrKey') === -1) {
