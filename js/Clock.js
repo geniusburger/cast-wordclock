@@ -150,6 +150,7 @@ Clock.prototype.updateSettings = function (updates) {
         if (typeof updates.time.start === 'number') {
             this.settings.time.start = updates.time.start;
             this.now = this.settings.time.start;
+            this.realTimeStarted = new Date().getTime();
             this.updateClock();
             this.startUpdatedListener && this.startUpdatedListener();
         }
@@ -260,9 +261,19 @@ Clock.prototype.finishLeadIn = function() {
 };
 
 Clock.prototype.tick = function() {
+    var realTime = new Date().getTime();
     this.now += 60000;
     this.callTickListener();
-    this.updateClock();
+    var date = this.updateClock();
+    if(this.settings.time.duration === 60000) {
+        // check and adjust time if running at a normal rate
+        var clockTime = date.getTime();
+        var realTimePassed = realTime - this.realTimeStarted;
+        var clockTimePassed = clockTime - this.settings.time.start;
+        var adjustment = realTimePassed - clockTimePassed;
+        console.log('adjustment: ' + adjustment);
+        this.now += adjustment;
+    }
 };
 
 Clock.prototype.callTickListener = function() {
@@ -273,6 +284,7 @@ Clock.prototype.callTickListener = function() {
 
 /**
  * Update the clock display
+ * @return {Date} The date displayed
  */
 Clock.prototype.updateClock = function () {
     var date = new Date(this.now);
@@ -283,6 +295,7 @@ Clock.prototype.updateClock = function () {
     this.setDayOfWeek(date.getDay());
     this.setDayOfMonth(date.getDate());
     this.setMonth(date.getMonth());
+    return date;
 };
 
 Clock.prototype.allOff = function() {
