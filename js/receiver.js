@@ -1,5 +1,6 @@
 rcvr = {};
 
+rcvr.keepOpen = true;
 rcvr.clock = null;
 rcvr.initialized = false;
 rcvr.messageQueue = [];
@@ -25,9 +26,9 @@ rcvr.castInit = function () {
 
     castReceiverManager.onSenderDisconnected = function (event) {
         rcvr.log('Ignoring Received Sender Disconnected event: ' + event.data);
-//        if (window.castReceiverManager.getSenders().length == 0) {
-//            window.close();
-//        }
+        if (!rcvr.keepOpen && window.castReceiverManager.getSenders().length == 0) {
+            window.close();
+        }
     };
 
     castReceiverManager.onSystemVolumeChanged = function (event) {
