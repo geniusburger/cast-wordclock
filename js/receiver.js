@@ -291,7 +291,7 @@ rcvr.receiverInit = function () {
             time: {
                 start: new Date().getTime(),
                 run: true,
-                duration: rcvr.getQueryVariable('ms') || 60000
+                duration: parseInt(rcvr.getQueryVariable('ms')) || 60000
             }
         };
         rcvr.clock.setTickListener(null, 15000);
