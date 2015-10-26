@@ -125,7 +125,7 @@ Clock.NAMESPACE = 'urn:x-cast:me.geniusburger.cast.wordclock';
 
 Clock.defaults = {
     time: {
-        start: new Date().getTime(),// Number, set the start time in milliseconds since midnight Jan 1, 1970
+        start: Date.now(),          // Number, set the start time in milliseconds since midnight Jan 1, 1970
         duration: 60000,		    // Number, [1,60000], set the duration of a minute
         run: true				    // Boolean, start/stop the clock
     },
@@ -150,7 +150,7 @@ Clock.prototype.updateSettings = function (updates) {
         if (typeof updates.time.start === 'number') {
             this.settings.time.start = updates.time.start;
             this.now = this.settings.time.start;
-            this.realTimeStarted = new Date().getTime();
+            this.realTimeStarted = Date.now();
             this.updateClock();
             this.startUpdatedListener && this.startUpdatedListener();
         }
@@ -261,7 +261,7 @@ Clock.prototype.finishLeadIn = function() {
 };
 
 Clock.prototype.tick = function() {
-    var realTime = new Date().getTime();
+    var realTime = Date.now();
     this.now += 60000;
     this.callTickListener();
     var date = this.updateClock();
