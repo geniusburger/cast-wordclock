@@ -133,7 +133,7 @@ Clock.defaults = {
         color: {
             background: "000000",	// String, 3 or 6 digit hex RGB color with optional '#'
             active: "FFFFFF",		// String, 3 or 6 digit hex RGB color with optional '#'
-            inactive: "333333"		// String, 3 or 6 digit hex RGB color with optional '#'
+            inactive: "222222"		// String, 3 or 6 digit hex RGB color with optional '#'
         }
     }
 };

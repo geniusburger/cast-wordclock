@@ -2,14 +2,11 @@
 Google Cast application to display a word clock.
 
 ### Chrome App
-http://cast.geniusburger.me/wordclock
+https://geniusburger.github.io/cast-wordclock/
 
 ![Chrome App](/img/sender.png?raw=true)
 
 ### Simple Demo
-http://cast.geniusburger.me/wordclock/receiver.html
+https://geniusburger.github.io/cast-wordclock/receiver.html
 
 ![Simple Demo Screenshot](/img/receiver.png)
-
-### All Apps
-[View all apps](http://cast.geniusburger.me)
