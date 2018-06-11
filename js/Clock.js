@@ -212,7 +212,7 @@ Clock.prototype.isValidColor = function (color) {
 };
 
 Clock.prototype.updateColors = function () {
-    var sheet = document.styleSheets[0];
+    var sheet = document.styleSheets[1]; // this must stay in sync with the order that stylesheets are referenced in html
 
     sheet.deleteRule(0);
     sheet.deleteRule(0);
